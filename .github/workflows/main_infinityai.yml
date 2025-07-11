@@ -29,14 +29,12 @@ jobs:
           python -m venv venv
           source venv/bin/activate
           
-      - name: Login to Azure CLI and List Resource Groups
-        run: |
-          az login --service-principal -u $(AZURE_CLIENT_ID) -p $(AZURE_CLIENT_SECRET) --tenant $(AZURE_TENANT_ID)
-          az account set --subscription $(AZURE_SUBSCRIPTION_ID)
-          az group list
+      - uses: azure/webapps-deploy@v2
+        with:
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
                    
-      - name: Install dependencies
-        run: bash start.sh
+      # - name: Install dependencies
+      #   run: bash start.sh
       
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
