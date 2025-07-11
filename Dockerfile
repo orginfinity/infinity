@@ -86,11 +86,11 @@ COPY ./.chainlit ./.chainlit
 
 # The EXPOSE instruction informs Docker that the container listens on the specified network ports at runtime.
 # For more information, see: https://docs.docker.com/engine/reference/builder/#expose
-EXPOSE 8000
+EXPOSE 8082
 
 # The ENTRYPOINT instruction has two forms:
 # * ENTRYPOINT ["executable", "param1", "param2"] (exec form, preferred)
 # * ENTRYPOINT command param1 param2 (shell form)
 # The ENTRYPOINT instruction allows you to configure a container that will run as an executable.
 # For more information, see: https://docs.docker.com/engine/reference/builder/#entrypoint
-CMD chainlit run $FILENAME --port=8000
+CMD chainlit run $FILENAME --port=8082
