@@ -50,7 +50,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 COPY requirements.txt .
 
 # Install the Python dependencies
-RUN pip install --no-cache-dir --no-deps -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Stage 2 - Copy only necessary files to the runner stage
 
