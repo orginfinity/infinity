@@ -1,0 +1,1 @@
+docker build -t infinity:v1 -f Dockerfile --build-arg FILENAME=app.py --build-arg PORT=8000 .
