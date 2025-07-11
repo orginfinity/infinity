@@ -76,4 +76,7 @@ jobs:
         with:
           app-name: 'infinityai'
           slot-name: 'Production'
+
+      - name: 'start app'
+        run: chainlit run app.py
           
