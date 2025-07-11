@@ -61,7 +61,7 @@ FROM python:3.11-slim
 ARG FILENAME=app.py
 
 # Deefine the port to run the application on as an argument
-ARG PORT=8000
+ARG PORT=80
 
 # Set an environment variable
 ENV FILENAME=${FILENAME}
