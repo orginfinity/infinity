@@ -16,7 +16,8 @@ jobs:
         password: ${{ secrets.REGISTRY_PASSWORD }}
 
     - run: |
-        docker build . -t infinity.azurecr.io/infinity:${{ github.sha }}
+        # docker build . -t infinity.azurecr.io/infinity:${{ github.sha }}
+        docker build . -t infinity.azurecr.io/infinity:${{ github.sha }} -f Dockerfile --build-arg FILENAME=app.py --build-arg PORT=80 
         docker push infinity.azurecr.io/infinity:${{ github.sha }}     
 
     - uses: azure/webapps-deploy@v2
