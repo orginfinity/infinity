@@ -23,4 +23,4 @@ jobs:
       with:
         app-name: 'infinity'
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        images: 'infinity.azurecr.io/myapp:${{ github.sha }}'
+        images: 'infinity.azurecr.io/infinity:${{ github.sha }}'
