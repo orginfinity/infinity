@@ -1,5 +1,5 @@
-chainlit===2.6.0
-python-dotenv==1.0.0
+chainlit
+python-dotenv
 
 #Flask
 #gunicorn
