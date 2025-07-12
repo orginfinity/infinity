@@ -93,8 +93,8 @@ EXPOSE 8080
 # * ENTRYPOINT command param1 param2 (shell form)
 # The ENTRYPOINT instruction allows you to configure a container that will run as an executable.
 # For more information, see: https://docs.docker.com/engine/reference/builder/#entrypoint
-# CMD chainlit run $FILENAME --port=8080
-CMD ["chainlit run $FILENAME --port=8080", "--bind", "0.0.0.0:8080"]
+CMD chainlit run $FILENAME --port=8080 "--bind", "0.0.0.0:8080"
+# CMD ["chainlit run $FILENAME --port=8080", "--bind", "0.0.0.0:8080"]
 
 
 # FROM python:3.9-slim
