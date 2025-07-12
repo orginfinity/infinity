@@ -97,12 +97,12 @@ EXPOSE 8080
 # CMD chainlit run app.py --port=8080 -bind 0.0.0.0:8080
 
 
-FROM  python:3.10
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt --default-timeout=100 future
-COPY . .
-EXPOSE 8080
+# FROM  python:3.10
+# WORKDIR /app
+# COPY requirements.txt .
+# RUN pip install -r requirements.txt --default-timeout=100 future
+# COPY . .
+# EXPOSE 8080
 CMD [ "chainlit", "run", "app.py", "-h","--host", "0.0.0.0", "--port", "8080"]   
 
 
