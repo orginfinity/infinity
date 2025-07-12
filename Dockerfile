@@ -88,22 +88,22 @@ COPY ./.chainlit ./.chainlit
 # For more information, see: https://docs.docker.com/engine/reference/builder/#expose
 EXPOSE 8080
 
-# The ENTRYPOINT instruction has two forms:
-# * ENTRYPOINT ["executable", "param1", "param2"] (exec form, preferred)
-# * ENTRYPOINT command param1 param2 (shell form)
-# The ENTRYPOINT instruction allows you to configure a container that will run as an executable.
-# For more information, see: https://docs.docker.com/engine/reference/builder/#entrypoint
-# CMD chainlit run $FILENAME --port=8080 "--bind", "0.0.0.0:8080"
-CMD chainlit run app.py --port=8080 -bind 0.0.0.0:8080
+# # The ENTRYPOINT instruction has two forms:
+# # * ENTRYPOINT ["executable", "param1", "param2"] (exec form, preferred)
+# # * ENTRYPOINT command param1 param2 (shell form)
+# # The ENTRYPOINT instruction allows you to configure a container that will run as an executable.
+# # For more information, see: https://docs.docker.com/engine/reference/builder/#entrypoint
+# # CMD chainlit run $FILENAME --port=8080 "--bind", "0.0.0.0:8080"
+# CMD chainlit run app.py --port=8080 -bind 0.0.0.0:8080
 
 
-# FROM python:3.9-slim
-# WORKDIR /app
-# COPY . /app
-# RUN pip install --no-cache-dir -r requirements.txt
-# EXPOSE 8080
-# ENV FLASK_APP=app.py
-# CMD ["chainlit run --port 8080", "--bind", "0.0.0.0:8080"]
+FROM  python:3.10
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt --default-timeout=100 future
+COPY . .
+EXPOSE 8080
+CMD ["python", "-m", "chainlit", "run", "app.py", "-h", "--port", "8080"]   
 
 
 # FROM python:3.9-slim
