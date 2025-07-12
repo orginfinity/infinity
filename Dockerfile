@@ -103,7 +103,7 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt --default-timeout=100 future
 COPY . .
 EXPOSE 8080
-CMD ["python", "-m", "chainlit", "run", "app.py", "-h", "--port", "8080"]   
+CMD ["python", "-m", "chainlit", "run", "app.py", "-h","--host", "0.0.0.0", "--port", "8080"]   
 
 
 # FROM python:3.9-slim
