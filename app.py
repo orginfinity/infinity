@@ -145,7 +145,7 @@ async def getImagesProps(images):
     return imagesProps
 
 async def get_images_fromgoogle(prompt):
-    uri = google_search_uri + prompt +"&searchType=image" + "$imgSize=medium"
+    uri = google_search_uri + prompt +"&searchType=image" + "&imgSize=medium"
  
     data = requests.get(uri).json()
     search_items = data.get("items")
