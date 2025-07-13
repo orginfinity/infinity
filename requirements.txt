@@ -2,3 +2,4 @@ chainlit
 python-dotenv
 azure-keyvault-secrets
 azure-identity
+openai
