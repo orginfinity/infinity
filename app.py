@@ -151,7 +151,7 @@ async def get_images_fromgoogle(prompt):
     search_items = data.get("items")
 
 # iterate over 10 results found
-    images = []
+    images = [] 
      
     for i, search_item in enumerate(search_items, start=1):
         content = ""

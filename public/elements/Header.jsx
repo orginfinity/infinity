@@ -218,7 +218,7 @@ const loadImages = () =>
     newRow = imagestable.insertRow(); 
      
      for (let i = 0; i < props.imagesCount; i++)
-     { 
+     {  
         if(i%2 == 0)
         {
             newRow = imagestable.insertRow(); 
