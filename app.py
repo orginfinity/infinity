@@ -245,52 +245,52 @@ thread = agents_client.threads.create()
 
 @cl.on_message
 async def on_message(message: cl.Message):  
-    sources_element_props = await get_websites_fromgoogle(message.content)   
-    images_element_props = await get_images_fromgoogle(message.content)
-    props = sources_element_props | images_element_props
-    Header  = cl.CustomElement(name="Header",props=props, display="inline")   
-    headerMsg = cl.Message(content="",elements=[Header],  author="Infinity")
-    await headerMsg.send()
-   
-    answerMsg = cl.Message(content="",  author="Infinity") 
-    async def StreamAgentResponse(prompt, forUris= False ):
-         
-        message = agents_client.messages.create(
-                    thread_id=thread.id,
-                    role=MessageRole.USER,
-                    content=prompt,
-                )
-        result = ""
-        
-        with agents_client.runs.stream(thread_id=thread.id, agent_id=agent.id) as stream:         
-            for event_type, event_data, _ in stream:
-                if isinstance(event_data, MessageDeltaChunk): 
-                     if not forUris:       
-                        await answerMsg.stream_token(event_data.text)    
-                        if event_data.delta.content and isinstance(event_data.delta.content[0], MessageDeltaTextContent):
-                            delta_text_content = event_data.delta.content[0]
-                            if delta_text_content.text and delta_text_content.text.annotations:
-                                for delta_annotation in delta_text_content.text.annotations:
-                                    if isinstance(delta_annotation, MessageDeltaTextUrlCitationAnnotation):                                                 
-                                        await answerMsg.stream_token(f"\nCitation: [{delta_annotation.url_citation.title}]({delta_annotation.url_citation.url})")
-                
-            response_message = agents_client.messages.get_last_message_by_role(thread_id=thread.id, role=MessageRole.AGENT)
+    try:    
+        sources_element_props = await get_websites_fromgoogle(message.content)   
+        images_element_props = await get_images_fromgoogle(message.content)
+        props = sources_element_props | images_element_props
+        Header  = cl.CustomElement(name="Header",props=props, display="inline")   
+        headerMsg = cl.Message(content="",elements=[Header],  author="Infinity")
+        await headerMsg.send()
+    
+        answerMsg = cl.Message(content="",  author="Infinity") 
+        async def StreamAgentResponse(prompt, forUris= False ):
             
-            if response_message:
-                for text_message in response_message.text_messages:
-                    result += text_message.text.value
-       
-        return result
+            message = agents_client.messages.create(
+                        thread_id=thread.id,
+                        role=MessageRole.USER,
+                        content=prompt,
+                    )
+            result = ""
+            
+            with agents_client.runs.stream(thread_id=thread.id, agent_id=agent.id) as stream:         
+                for event_type, event_data, _ in stream:
+                    if isinstance(event_data, MessageDeltaChunk): 
+                        if not forUris:       
+                            await answerMsg.stream_token(event_data.text)    
+                            if event_data.delta.content and isinstance(event_data.delta.content[0], MessageDeltaTextContent):
+                                delta_text_content = event_data.delta.content[0]
+                                if delta_text_content.text and delta_text_content.text.annotations:
+                                    for delta_annotation in delta_text_content.text.annotations:
+                                        if isinstance(delta_annotation, MessageDeltaTextUrlCitationAnnotation):                                                 
+                                            await answerMsg.stream_token(f"\nCitation: [{delta_annotation.url_citation.title}]({delta_annotation.url_citation.url})")
+                    
+                response_message = agents_client.messages.get_last_message_by_role(thread_id=thread.id, role=MessageRole.AGENT)
+                
+                if response_message:
+                    for text_message in response_message.text_messages:
+                        result += text_message.text.value
+        
+            return result
+        
+        await StreamAgentResponse(message.content)
     
-    await StreamAgentResponse(message.content)
- 
- 
-    prompt = "give me response in the following JSON format {\"Q1\":\"..\",\"Q2\":\"..\",\"Q3\":\"..\",\"Q4\":\"..\"}. " \
-    "Q1,Q2,Q3 and Q4 are for the follow up questions to the prompt. Your prompt is this -" + message.content
+    
+        prompt = "give me response in the following JSON format {\"Q1\":\"..\",\"Q2\":\"..\",\"Q3\":\"..\",\"Q4\":\"..\"}. " \
+        "Q1,Q2,Q3 and Q4 are for the follow up questions to the prompt. Your prompt is this -" + message.content
 
-    questions = await StreamAgentResponse(prompt,True)
+        questions = await StreamAgentResponse(prompt,True)        
     
-    try:
         questions = json.loads(questions)
         questions_element_props = await get_questions(questions) 
         questions_element = cl.CustomElement(name="FollowUpQuestions",props=questions_element_props )

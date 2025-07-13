@@ -156,10 +156,7 @@ const Header = () =>
 }
 
 const loadSources = () =>
-{    
-    for (const [key, value] of Object.entries(props)) {
-    console.error(key, value);
-    }
+{     
     const sourcestable =   document.createElement('table')
     sourcestable.id = "sourcesTable"
     // newRow = sourcestable.insertRow(); 
