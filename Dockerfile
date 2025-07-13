@@ -83,6 +83,7 @@ COPY chainlit.md .
 
 # Copy the .chainlit folder to the working directory
 COPY ./.chainlit ./.chainlit
+COPY ./public ./public
 
 # The EXPOSE instruction informs Docker that the container listens on the specified network ports at runtime.
 # For more information, see: https://docs.docker.com/engine/reference/builder/#expose
