@@ -32,6 +32,7 @@ def getKeyValue(secret_name):
         retrieved_secret = client.get_secret(secret_name)
         return retrieved_secret.value
     except Exception as e:
+        print(e)
         return None
 
 temperature = 0.9  

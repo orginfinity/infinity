@@ -1,0 +1,130 @@
+/* CollapsiblePanel.css */
+.collapsible-panel {
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  overflow: hidden; /* Crucial for height transitions */
+}
+
+.panel-header {
+  background-color:white;
+  padding: 10px 15px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 1.1em;
+  background-color: white;
+}
+
+.arrow {
+  transition: transform 0.3s ease-in-out;
+}
+
+.arrow.open {
+  transform: rotate(180deg); /* Up arrow when open */
+}
+
+.panel-content {
+  max-height: 0; /* Initially hidden */
+  overflow: hidden;
+  transition: max-height 0.5s ease-in-out; /* Smooth height transition */
+  color: green; 
+}
+
+.panel-content.open {
+  max-height: 500px; /* Or a sufficiently large value */
+  padding: 15px; /* Add padding when open */
+}
+
+.img {
+   width: 90%;
+  height: auto;
+}
+
+.smalltd {
+      width: 12%;
+    }
+ 
+    .websitepanel
+    {
+    color:black; 
+    background-color: white;
+    padding:"10px 15px";
+    border: "2px solid brown"; 
+    }
+
+  .smalltd {
+  padding-top: 2%;
+  padding-bottom: 2%;
+  padding-left: 2%;
+  padding-right: 2%;
+  width: 10%;
+  height: auto
+}
+
+  .mediumtd {
+  padding-top: 2%;
+  padding-bottom: 2%;
+  padding-left: 2%;
+  padding-right: 2%;
+  width: 30%;
+  height: auto
+}
+
+  .bigtd {
+  padding-top: 2%;
+  padding-bottom: 2%;
+  padding-left: 2%;
+  padding-right: 2%;
+  width: 50%;
+  height: auto
+}
+
+
+.headerbutton
+{
+  background-color: grey;
+  padding-right: 5px;
+  padding-left: 5px;
+  padding-top:5px;
+  padding-bottom:5px;
+  border-radius: 10px;
+  font-size: smaller;
+}
+
+.img_thumbnails {
+width:60%
+}
+
+.img_thumbnails_big {
+width:80%
+}
+
+
+.img_favicons {
+width:100px;
+height:auto
+}
+
+a
+{
+  font-size: smaller;
+  font-style: italic;
+  
+}
+ 
+.sourceContent
+{
+  font-size: small;
+}
+
+.sourceTitle
+{
+  font-weight: bold;
+}
+ 
