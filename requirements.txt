@@ -4,4 +4,4 @@ azure-keyvault-secrets
 azure-identity
 openai
 azure-ai-ml
-azure-ai-openai
+azure-ai-projects
