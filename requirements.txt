@@ -3,3 +3,4 @@ python-dotenv
 azure-keyvault-secrets
 azure-identity
 openai
+azure-ai-ml
