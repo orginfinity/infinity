@@ -219,7 +219,7 @@ const loadImages = () =>
      
      for (let i = 0; i < props.imagesCount; i++)
      { 
-        if(i%3 == 0)
+        if(i%2 == 0)
         {
             newRow = imagestable.insertRow(); 
         }
@@ -237,7 +237,7 @@ const loadImages = () =>
         ahrefElement.textContent  = displayLink
         ahrefElement.href = contextLink
 
-        cell1.classList.add('mediumtd')
+        cell1.classList.add('bigtd')
         cell1.appendChild(imgElement)
         cell1.appendChild(ahrefElement)
      }

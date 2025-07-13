@@ -100,8 +100,8 @@ async def getWebsitesProps(websites,titles,favicons, contents,thumbnails):
     return websitesProps
 
 class imageFromGoogle:
-    def __init__(self,thumbnailLink,displayLink,contextLink):
-        self.thumbnailLink = thumbnailLink
+    def __init__(self,link,displayLink,contextLink):
+        self.link =link
         self.displayLink = displayLink
         self.contextLink = contextLink
 
@@ -121,7 +121,7 @@ async def getImagesProps(images):
     imageCount = 0
     while i < len(images):
         thumbnailLinkKey = "thumbnailLink" + str(i)
-        thumbnailLink = images[i].thumbnailLink
+        thumbnailLink = images[i].link
         imagesProps[thumbnailLinkKey] = thumbnailLink
 
         
@@ -156,9 +156,9 @@ async def get_images_fromgoogle(prompt):
     for i, search_item in enumerate(search_items, start=1):
         content = ""
         imgObject = search_item.get("image")
-        image = imageFromGoogle(imgObject.get("thumbnailLink"), search_item.get("displayLink"),imgObject.get("contextLink"))
+        image = imageFromGoogle(search_item.get("link"), search_item.get("displayLink"),imgObject.get("contextLink"))
 
-        if(image.displayLink != None and image.contextLink != None and image.thumbnailLink != None):
+        if(image.link != None and image.contextLink != None and image.displayLink != None):
             images.append(image)
     logger.info("LENGTH: %s",len(images))
     props =  await getImagesProps(images)
