@@ -16,24 +16,39 @@ from dotenv import load_dotenv
 from dotenv import dotenv_values
 from chainlit.input_widget import Select, Switch, Slider
 import json
-import requests
-# from bs4 import BeautifulSoup  
+import requests 
 
+
+secrets = {}
+secrets["google-search-uri"] = None
+secrets["google-fav-icons-uri"] = None
+secrets["agent-uri"] = None
 
 def getKeyValue(secret_name):
-    key_vault_url = "https://infinity.vault.azure.net/"
 
-    # Authenticate using DefaultAzureCredential
-    credential = DefaultAzureCredential()
+    if secret_name not in secrets.keys():
+        return None
+    
+    if secrets[secret_name] != None:
+        return secrets[secret_name]
+    
+    key_vault_url = "https://infinity.vault.azure.net/" 
+    credential = DefaultAzureCredential() 
     client = SecretClient(vault_url=key_vault_url, credential=credential)
- 
+    
     try:
         # Retrieve the secret
         retrieved_secret = client.get_secret(secret_name)
+        secrets[secret_name] = retrieved_secret.value
         return retrieved_secret.value
     except Exception as e:
         print(e)
         return None
+
+
+google_search_uri = getKeyValue("google-search-uri")
+google_fav_icons_uri = getKeyValue("google-fav-icons-uri") 
+agent_uri =  getKeyValue("agent-uri")  
 
 temperature = 0.9  
 # api_key = getKeyValue("api-key")
@@ -46,9 +61,7 @@ system_content = "You are a helpful assistant."
 max_retries = 5
 timeout = 30
 debug = "true" 
-google_search_uri = getKeyValue("google-search-uri")
-google_fav_icons_uri = getKeyValue("google-fav-icons-uri") 
-agent_uri =  getKeyValue("agent-uri")  
+
  
 import os
 from typing import Any
@@ -235,21 +248,37 @@ async def on_action(action):
 
 project_client = AIProjectClient(
             endpoint= agent_uri,
-            credential=DefaultAzureCredential(),
+            credential=DefaultAzureCredential(), 
         )
-
+ 
 agents_client = project_client.agents
 agent = agents_client.get_agent("asst_58piOsPpG4mOb2CdVWZC9uPF")
-thread = agents_client.threads.create()
 
-
+from collections import defaultdict
+messages = defaultdict(int)
+ 
 @cl.on_message
 async def on_message(message: cl.Message):  
+    errorMsg = cl.Message(content="")
     try:    
+        thread = None
+
+        try:
+            thread = cl.user_session.get("message_thread")
+            if thread == None:
+                thread = agents_client.threads.create()
+                cl.user_session.set("message_thread", thread)
+               
+        except Exception as e: 
+            errorMsg.content = "Error while reading/creating thrad\n:" + str(e)
+            await errorMsg.send()
+            return
+    
         sources_element_props = await get_websites_fromgoogle(message.content)   
         images_element_props = await get_images_fromgoogle(message.content)
-        props = sources_element_props | images_element_props
-        Header  = cl.CustomElement(name="Header",props=props, display="inline")   
+        headerProps = sources_element_props | images_element_props
+        
+        Header  = cl.CustomElement(name="Header",props=headerProps, display="inline")   
         headerMsg = cl.Message(content="",elements=[Header],  author="Infinity")
         await headerMsg.send()
     
@@ -260,6 +289,7 @@ async def on_message(message: cl.Message):
                         thread_id=thread.id,
                         role=MessageRole.USER,
                         content=prompt,
+                        
                     )
             result = ""
             
@@ -284,8 +314,7 @@ async def on_message(message: cl.Message):
             return result
         
         await StreamAgentResponse(message.content)
-    
-    
+  
         prompt = "give me response in the following JSON format {\"Q1\":\"..\",\"Q2\":\"..\",\"Q3\":\"..\",\"Q4\":\"..\"}. " \
         "Q1,Q2,Q3 and Q4 are for the follow up questions to the prompt. Your prompt is this -" + message.content
 

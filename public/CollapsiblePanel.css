@@ -95,6 +95,7 @@
   padding-bottom:5px;
   border-radius: 10px;
   font-size: smaller;
+ 
 }
 
 .img_thumbnails {
@@ -102,20 +103,21 @@ width:60%
 }
 
 .img_thumbnails_big {
-width:80%
+width:100%;
+text-align:Center
 }
 
 
 .img_favicons {
-width:100px;
+width:60%;
 height:auto
 }
 
 a
 {
-  font-size: smaller;
+  font-size: small;
   font-style: italic;
-  
+ 
 }
  
 .sourceContent
@@ -128,3 +130,18 @@ a
   font-weight: bold;
 }
  
+.buttondisabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+td{
+  /* display: inline-block; */
+  text-align: center; 
+}
+
+figure {
+  display: inline-block;
+  text-align: center
+  
+}

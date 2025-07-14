@@ -2,8 +2,7 @@ import React , { useEffect } from 'react';
  
 
 const sourcesClicked = (elem) => 
-    { 
-
+    {   
         parentElem =  elem.target
          
         while (parentElem != null)
@@ -22,8 +21,12 @@ const sourcesClicked = (elem) =>
                     answerWindow = answerWindow.getElementsByClassName('message-content')[0]
 
                     child =Array.from(answerWindow.children)[0]
-                    child.style.display = "none" 
-                    
+
+                    if(child != null)
+                    {
+                        child.style.display = "none" 
+                    }
+
                     imagesTable = answerWindow.querySelector('#imagesTable');
                     if(imagesTable != null)
                     {
@@ -37,7 +40,7 @@ const sourcesClicked = (elem) =>
                     }
                     else
                     {
-                        sourcesstable.style.display = "inline"
+                        sourcestable.style.display = "inline"
                     }
                     break
                 }
@@ -63,8 +66,12 @@ const imagesClicked = (elem) =>
                     answerWindow = answerWindow.getElementsByClassName('message-content')[0]
 
                     child =Array.from(answerWindow.children)[0]
-                    child.style.display = "none" 
-                    
+
+                    if(child != null)
+                    {
+                        child.style.display = "none" 
+                    }
+
                     sourcesstable = answerWindow.querySelector('#sourcesTable');
                     if(sourcesstable != null)
                     {
@@ -91,8 +98,7 @@ const imagesClicked = (elem) =>
 
     
 const answerClicked = (elem) => 
-    {
-
+    {      
         parentElem =  elem.target
     
         while (parentElem != null)
@@ -108,8 +114,12 @@ const answerClicked = (elem) =>
 
                     child =Array.from(answerWindow.children)[0]
                     child.innerHtml = props.answer
-                    child.style.display = "inline" 
-                     
+
+                    if(child != null)
+                    {
+                        child.style.display = "inline" 
+                    }
+
                     imagestable = answerWindow.querySelector('#imagesTable')
                     if (imagestable != null)
                     {
@@ -129,25 +139,25 @@ const answerClicked = (elem) =>
             parentElem = parentElem.parentNode
         }
     }
-
+  
 const Header = () =>
-{   
-     useEffect(() => {
-    
+{    
+    useEffect(() => { 
+     
       }, []); 
      
     return (
-        <div>
+        <div id="headerelem">
             <table>
                 <tr>
                     <td>
-                        <button className="headerbutton" onClick={answerClicked} id="answer">ANSWER</button>
+                        <button className="headerbutton " onClick={answerClicked}  id="answer"  >ANSWER</button>
                     </td>
                     <td>
-                         <button className="headerbutton" onClick={sourcesClicked} id="sources">SOURCES</button>
+                         <button className="headerbutton "  onClick={sourcesClicked}  id="sources"  >SOURCES</button>
                     </td>
                     <td>
-                        <button className="headerbutton" onClick={imagesClicked} id="images">IMAGES</button>
+                        <button className="headerbutton " onClick={imagesClicked}   id="images"  >IMAGES</button>
                     </td>
                 </tr>
             </table> 
@@ -158,9 +168,7 @@ const Header = () =>
 const loadSources = () =>
 {     
     const sourcestable =   document.createElement('table')
-    sourcestable.id = "sourcesTable"
-    // newRow = sourcestable.insertRow(); 
-     
+    sourcestable.id = "sourcesTable" 
      for (let i = 0; i < props.sourceCount; i++)
      { 
         newRow = sourcestable.insertRow();
@@ -180,6 +188,7 @@ const loadSources = () =>
         
         const cell2 = newRow.insertCell(0);  
         const websitesElement  = document.createElement('a');   
+        websitesElement.target = "_blank"
         websitesElement.style.color = "red"     
         websitesElement.href = websiteLink
         websitesElement.textContent = websiteLink.slice(0, 50) + "...";
@@ -192,9 +201,10 @@ const loadSources = () =>
         contentElement.innerHTML = contentsLink
         contentElement.classList.add('sourceContent')
         cell2.classList.add('bigtd')
-        cell2.appendChild(websitesElement)
+       
         cell2.appendChild(titleElement) 
         cell2.appendChild(contentElement) 
+        cell2.appendChild(websitesElement)
 
         const cell1 = newRow.insertCell(0); 
         const imgElement = document.createElement('img'); 
@@ -204,6 +214,7 @@ const loadSources = () =>
         cell1.appendChild(imgElement)
  
      }
+     
      return sourcestable  
 }
 
@@ -230,13 +241,37 @@ const loadImages = () =>
 
         imgElement.src = thumbnailLink;  
         const ahrefElement  = document.createElement('a');
-    
-        ahrefElement.textContent  = displayLink
-        ahrefElement.href = contextLink
+        ahrefElement.target = "_blank"
+        ahrefElement.style.color = "red"
 
+        ahrefElement.textContent  = displayLink
+        ahrefElement.href = contextLink 
         cell1.classList.add('bigtd')
-        cell1.appendChild(imgElement)
-        cell1.appendChild(ahrefElement)
+ 
+        imgElement.onload = function() {
+        if (imgElement.width > 0 && imgElement.height > 0) {
+ 
+            cell1.appendChild(imgElement)
+            if (imgElement.complete) { 
+                cell1.appendChild(ahrefElement) 
+            } 
+            else {
+                imgElement.addEventListener('load', () => { 
+                cell1.appendChild(ahrefElement) 
+            });}
+        }  
+        };
+
+        // cell1.appendChild(imgElement)
+
+        //  if (imgElement.complete) { 
+        //         cell1.appendChild(ahrefElement)
+        // } 
+        // else {
+        //     imgElement.addEventListener('load', () => { 
+        //     cell1.appendChild(ahrefElement)
+        // });}
+ 
      }
      return imagestable  
 }
