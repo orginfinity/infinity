@@ -145,3 +145,7 @@ figure {
   text-align: center
   
 }
+
+.watermark {
+  display: none !important;
+}
