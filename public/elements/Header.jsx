@@ -143,11 +143,11 @@ const answerClicked = (elem) =>
 const enableButtons = () =>
 {
    btnSources = document.getElementById('sources')
+ 
    if(props.sourceCount > 0){
     btnSources.style.display = "inline"
    }
-
-   
+ 
    btnImages = document.getElementById('images')
    if(props.imagesCount > 0){
     btnImages.style.display = "inline"
