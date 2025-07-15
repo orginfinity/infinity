@@ -57,7 +57,7 @@ api_version = "2024-12-01-preview"
 engine = "gpt-4o"
 model ="gpt-4o"
 
-system_content = "You are a helpful assistant."
+system_content = "Do not ask any clarifying questions. When asked for follow up questions, suggest questions based on the theme of the prompt"
 max_retries = 5
 timeout = 30
 debug = "true" 
@@ -316,7 +316,7 @@ async def on_message(message: cl.Message):
         await StreamAgentResponse(message.content)
   
         prompt = "give me response in the following JSON format {\"Q1\":\"..\",\"Q2\":\"..\",\"Q3\":\"..\",\"Q4\":\"..\"}. " \
-        "Q1,Q2,Q3 and Q4 are for the follow up questions to the prompt. Your prompt is this -" + message.content
+        "Q1,Q2,Q3 and Q4 are for the follow up questions to the prompt. Do not ask any clarifying questions. Your prompt is this -" + message.content
 
         questions = await StreamAgentResponse(prompt,True)        
     
