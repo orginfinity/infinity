@@ -151,13 +151,13 @@ const Header = () =>
             <table>
                 <tr>
                     <td>
-                        <button className="headerbutton " onClick={answerClicked}  id="answer"  >ANSWER</button>
+                        <button className="headerbutton  bg-accent" onClick={answerClicked}  id="answer"  >ANSWER</button>
                     </td>
                     <td>
-                         <button className="headerbutton "  onClick={sourcesClicked}  id="sources"  >SOURCES</button>
+                         <button className="headerbutton  bg-accent"  onClick={sourcesClicked}  id="sources"  >SOURCES</button>
                     </td>
                     <td>
-                        <button className="headerbutton " onClick={imagesClicked}   id="images"  >IMAGES</button>
+                        <button className="headerbutton  bg-accent" onClick={imagesClicked}   id="images"  >IMAGES</button>
                     </td>
                 </tr>
             </table> 

@@ -57,7 +57,7 @@ api_version = "2024-12-01-preview"
 engine = "gpt-4o"
 model ="gpt-4o"
 
-system_content = "Do not ask any clarifying questions. When asked for follow up questions, suggest questions based on the theme of the prompt"
+system_content = "Do not ask any clarifying questions."
 max_retries = 5
 timeout = 30
 debug = "true" 
