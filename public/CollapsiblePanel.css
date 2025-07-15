@@ -149,3 +149,18 @@ figure {
 .watermark {
   display: none !important;
 }
+
+.error
+{
+  font-size: large;
+ 
+}
+
+.errorPanel{
+  padding-top: 5%;
+  padding-bottom: 5%;
+  text-align: center;
+ 
+  background-color: gray;  
+  border-radius: 300px;
+}

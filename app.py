@@ -75,12 +75,6 @@ from azure.ai.agents.models import (
 )
  
 
-@cl.on_chat_start
-async def on_chat_start():  
-    message_history = [{"role": "system", "content": system_content}] 
-    cl.user_session.set("message_history",  message_history )
-
-logger = logging.getLogger(__name__)
 
 async def getWebsitesProps(websites,titles,favicons, contents,thumbnails):
     # logger.info("Contents: %s", websites)
@@ -90,26 +84,31 @@ async def getWebsitesProps(websites,titles,favicons, contents,thumbnails):
     i = 0
     sourceCount = 0
     # for i in range(len(websites)):
-    while i < len(websites):
-        if(i < len(websites) and i < len(titles) and i < len(favicons) and i < len(contents) and i < len(thumbnails)):
-            websiteKey = "website"+str(i) 
 
-            contentsKey = "contents"+str(i)
-            thumbnailKey = "thumbnail"+str(i)
-            titlesKey = "titles"+str(i)
-            faviconKey = "favicon"+str(i)
-            
-            if websites[i] != None and contents[i] !=  None and thumbnails[i] != None and titles[i] != None and favicons[i] != None:
-                # logger.info("WEBSITE : %s\n",websites[i])
-                websitesProps[websiteKey] = websites[i]
-                websitesProps[contentsKey] = contents[i]
-                websitesProps[thumbnailKey] = thumbnails[i]
-                websitesProps[titlesKey] = titles[i]
-                websitesProps[faviconKey] = favicons[i]
-                sourceCount += 1
-        i += 1
-    # logger.info("website props%s",websitesProps)
-    websitesProps["sourceCount"] = sourceCount
+    try:
+        while i < len(websites):
+            if(i < len(websites) and i < len(titles) and i < len(favicons) and i < len(contents) and i < len(thumbnails)):
+                websiteKey = "website"+str(i) 
+
+                contentsKey = "contents"+str(i)
+                thumbnailKey = "thumbnail"+str(i)
+                titlesKey = "titles"+str(i)
+                faviconKey = "favicon"+str(i)
+                
+                if websites[i] != None and contents[i] !=  None and thumbnails[i] != None and titles[i] != None and favicons[i] != None:
+                    # logger.info("WEBSITE : %s\n",websites[i])
+                    websitesProps[websiteKey] = websites[i]
+                    websitesProps[contentsKey] = contents[i]
+                    websitesProps[thumbnailKey] = thumbnails[i]
+                    websitesProps[titlesKey] = titles[i]
+                    websitesProps[faviconKey] = favicons[i]
+                    sourceCount += 1
+            i += 1
+    except Exception as e:
+        logger = cl.user_session.get("logger")
+        logger.error("Error while preparing websites props \n %s",e)
+    finally: 
+        websitesProps["sourceCount"] = sourceCount
     return websitesProps
 
 class imageFromGoogle:
@@ -132,69 +131,76 @@ async def getImagesProps(images):
 
     i = 0
     imageCount = 0
-    while i < len(images):
-        thumbnailLinkKey = "thumbnailLink" + str(i)
-        thumbnailLink = images[i].link
-        imagesProps[thumbnailLinkKey] = thumbnailLink
 
-        
-        displayLinkKey = "displayLink" + str(i)
-        displayLink = images[i].displayLink
-        imagesProps[displayLinkKey] = displayLink
- 
-        contextLinkkey = "contextLink" + str(i)
-        contextLink = images[i].contextLink
-        imagesProps[contextLinkkey] = contextLink
-
-        if thumbnailLink != None and displayLink != None and contextLink != None:
+    try:
+        while i < len(images):
+            thumbnailLinkKey = "thumbnailLink" + str(i)
+            thumbnailLink = images[i].link
             imagesProps[thumbnailLinkKey] = thumbnailLink
-            imagesProps[displayLinkKey] = displayLink
-            imagesProps[contextLinkkey] = contextLink
-            imageCount += 1
-        i += 1
 
-    imagesProps["imagesCount"] = imageCount
-    # logger.info("\nIMAGES\n: %s",imagesProps)
+            
+            displayLinkKey = "displayLink" + str(i)
+            displayLink = images[i].displayLink
+            imagesProps[displayLinkKey] = displayLink
+    
+            contextLinkkey = "contextLink" + str(i)
+            contextLink = images[i].contextLink
+            imagesProps[contextLinkkey] = contextLink
+
+            if thumbnailLink != None and displayLink != None and contextLink != None:
+                imagesProps[thumbnailLinkKey] = thumbnailLink
+                imagesProps[displayLinkKey] = displayLink
+                imagesProps[contextLinkkey] = contextLink
+                imageCount += 1
+            i += 1
+    except Exception as e:
+        logger = cl.user_session.get("logger")
+        logger.info("Error while populating image props from Google\n%s",e)
+    finally:
+        imagesProps["imagesCount"] = imageCount
+     
     return imagesProps
 
 async def get_images_fromgoogle(prompt):
-    uri = google_search_uri + prompt +"&searchType=image" + "&imgSize=medium"
- 
-    data = requests.get(uri).json()
-    search_items = data.get("items")
 
-# iterate over 10 results found
-    images = [] 
-     
-    for i, search_item in enumerate(search_items, start=1):
-        content = ""
-        imgObject = search_item.get("image")
-        image = imageFromGoogle(search_item.get("link"), search_item.get("displayLink"),imgObject.get("contextLink"))
+    try:
+        uri = google_search_uri + prompt +"&searchType=image" + "&imgSize=medium" 
+        data = requests.get(uri).json()
+        search_items = data.get("items") 
+        images = [] 
+        
+        for i, search_item in enumerate(search_items, start=1):
+            content = ""
+            imgObject = search_item.get("image")
+            image = imageFromGoogle(search_item.get("link"), search_item.get("displayLink"),imgObject.get("contextLink"))
 
-        if(image.link != None and image.contextLink != None and image.displayLink != None):
-            images.append(image)
-    logger.info("LENGTH: %s",len(images))
-    props =  await getImagesProps(images)
+            if(image.link != None and image.contextLink != None and image.displayLink != None):
+                images.append(image)
+    except:
+        logger = cl.user_session.get("logger")
+        logger.info("Error while getting images from google:\n %s",len(images))
+    finally:
+        props =  await getImagesProps(images)
  
     return props 
 
 async def get_websites_fromgoogle(prompt):
-    uri = google_search_uri + prompt
- 
-    data = requests.get(uri).json()
-    search_items = data.get("items")
-
-# iterate over 10 results found
-    contents = []
-    websites = []
-    thumbnails = []
-    titles = []
-    favicons = []
-    
-    if(search_items == None):
-        return
     try:
+        uri = google_search_uri + prompt
+    
+        data = requests.get(uri).json()
+        search_items = data.get("items")
 
+    # iterate over 10 results found
+        contents = []
+        websites = []
+        thumbnails = []
+        titles = []
+        favicons = []
+        
+        if(search_items == None):
+            return
+    
         for i, search_item in enumerate(search_items, start=1):
             content = ""
     
@@ -223,87 +229,172 @@ async def get_websites_fromgoogle(prompt):
 
             contents.append(content) 
         favicons = get_fav_icons(websites)
-        props =  await getWebsitesProps(websites,titles, favicons, contents,thumbnails)
-       
+        
+    except Exception as e:
+        logger = cl.user_session.get("logger")
+        logger.info("Error while fetching websites from google \n%s",e)
+    finally:
+        props =  await getWebsitesProps(websites,titles, favicons, contents,thumbnails)       
         props["prompt"] = prompt
+
+    return props 
+
+async def get_questionsProps(questions):
+    props = {}
+    try:
+        if questions["Q1"] != None:
+            props["question1"] =questions["Q1"]
+        if questions["Q2"] != None:
+            props["question2"] =questions["Q2"]
+        if questions["Q3"] != None:
+            props["questio3"] =questions["Q3"]
+        if questions["Q4"] != None:
+            props["question4"] =questions["Q4"]
+ 
+    except Exception as e:
+        logger = cl.user_session.get("logger")
+        logger.info("Exception while preparing questions props:\n%s",e)
+    finally:
         return props 
-    except:
-        return None
-
-async def get_questions(questions):
-    """Pretending to fetch data from linear"""
-    return {
-        "question1":questions["Q1"],
-        "question2":questions["Q2"],
-        "question3":questions["Q3"],
-        "question4":questions["Q4"] 
-    }
  
-@cl.action_callback("followup_questions_action")
-async def on_action(action):
-    payload = action.payload
-    val = payload["value"]
-    sources_element = cl.CustomElement(name="LinearTicket",props=val) 
-    await cl.Message(content="",elements=[sources_element]).update()
+# @cl.action_callback("followup_questions_action")
+# async def on_action(action):
+#     payload = action.payload
+#     val = payload["value"]
+#     sources_element = cl.CustomElement(name="LinearTicket",props=val) 
+#     await cl.Message(content="",elements=[sources_element]).update()
 
-project_client = AIProjectClient(
-            endpoint= agent_uri,
-            credential=DefaultAzureCredential(), 
-        )
- 
-agents_client = project_client.agents
-agent = agents_client.get_agent("asst_58piOsPpG4mOb2CdVWZC9uPF")
+
 
 from collections import defaultdict
 messages = defaultdict(int)
- 
-@cl.on_message
-async def on_message(message: cl.Message):  
-    errorMsg = cl.Message(content="")
-    try:    
-        thread = None
+project_client = None
+agents_client= None
+agent = None 
+@cl.on_chat_start
+async def on_chat_start():  
+    message_history = [{"role": "system", "content": system_content}] 
+    cl.user_session.set("message_history",  message_history )
 
-        try:
-            thread = cl.user_session.get("message_thread")
-            if thread == None:
-                thread = agents_client.threads.create()
-                cl.user_session.set("message_thread", thread)
-               
-        except Exception as e: 
-            errorMsg.content = "Error while reading/creating thrad\n:" + str(e)
-            await errorMsg.send()
-            return
+    try:
+        project_client = cl.user_session.get("project_client")
+        if project_client == None:
+            project_client = AIProjectClient(endpoint= agent_uri,credential=DefaultAzureCredential())
+            cl.user_session.set("project_client", project_client)
+            
+    except Exception as e: 
+        logger.error("Error while creating project_client: \n%s",e)
+        return
+
+    try:
+        agents_client = cl.user_session.get("agents_client")
+        if agents_client == None:
+            agents_client = project_client.agents 
+            cl.user_session.set("agents_client", agents_client)
+            
+    except Exception as e: 
+        logger.error("Error while creating agents_client: \n%s",e)
+        return 
+ 
+    try:
+        agent = cl.user_session.get("agents_agentclient")
+        if agent == None:
+            agent = agents_client.get_agent("asst_58piOsPpG4mOb2CdVWZC9uPF")
+            cl.user_session.set("agent", agent)
+            
+    except Exception as e: 
+        logger.error("Error while creating agent: \n%s",e) 
+        return  
     
-        sources_element_props = await get_websites_fromgoogle(message.content)   
-        images_element_props = await get_images_fromgoogle(message.content)
+    try:
+        thread = cl.user_session.get("thread")
+        if thread == None:
+            thread = agents_client.threads.create()
+            cl.user_session.set("thread", thread)
+            
+    except Exception as e: 
+        logger.error("Error while creating agent: \n%s",e) 
+        return  
+
+    try:
+        logger = cl.user_session.get("logger")
+        if logger == None:
+            logger = logging.getLogger(__name__)
+            cl.user_session.set("logger", logger)
+            
+    except Exception as e: 
+        logger.error("Error while logger: \n%s",e) 
+        return   
+
+def checkForSessionVariables():
+ 
+    try:
+        project_client = cl.user_session.get("project_client")
+        agents_client = cl.user_session.get("agents_client")
+        agent = cl.user_session.get("agent")
+        logger = cl.user_session.get("logger")
+        thread = cl.user_session.get("thread")
+    except Exception as e:
+        return False
+    
+
+    if project_client == None or agents_client == None or agent == None or  thread == None or logger == None:
+            return False
+    
+    return True
+
+async def returnError():
+    image = cl.Image(path="./maintenance.gif", name="image1", display="inline") 
+    await cl.Message(
+            content="There was an error establishing session. We are on it!",
+            elements=[image],
+        ).send()
+    
+
+@cl.on_message
+async def on_message(message: cl.Message): 
+     
+    if checkForSessionVariables() == False:      
+        await returnError()
+     
+    agents_client = cl.user_session.get("agents_client")
+    agent = cl.user_session.get("agent")
+    logger = cl.user_session.get("logger")
+    thread = cl.user_session.get("thread") 
+  
+    sources_element_props = await get_websites_fromgoogle(message.content)   
+    images_element_props = await get_images_fromgoogle(message.content)
+
+    if sources_element_props["sourceCount"] != 0 or images_element_props["imagesCount"] != 0:
         headerProps = sources_element_props | images_element_props
         
         Header  = cl.CustomElement(name="Header",props=headerProps, display="inline")   
         headerMsg = cl.Message(content="",elements=[Header],  author="Infinity")
         await headerMsg.send()
     
-        answerMsg = cl.Message(content="",  author="Infinity") 
-        async def StreamAgentResponse(prompt, forUris= False ):
-            
-            message = agents_client.messages.create(
-                        thread_id=thread.id,
-                        role=MessageRole.USER,
-                        content=prompt,
-                        
-                    )
-            result = ""
-            
-            with agents_client.runs.stream(thread_id=thread.id, agent_id=agent.id) as stream:         
-                for event_type, event_data, _ in stream:
-                    if isinstance(event_data, MessageDeltaChunk): 
-                        if not forUris:       
-                            await answerMsg.stream_token(event_data.text)    
-                            if event_data.delta.content and isinstance(event_data.delta.content[0], MessageDeltaTextContent):
-                                delta_text_content = event_data.delta.content[0]
-                                if delta_text_content.text and delta_text_content.text.annotations:
-                                    for delta_annotation in delta_text_content.text.annotations:
-                                        if isinstance(delta_annotation, MessageDeltaTextUrlCitationAnnotation):                                                 
-                                            await answerMsg.stream_token(f"\nCitation: [{delta_annotation.url_citation.title}]({delta_annotation.url_citation.url})")
+
+    answerMsg = cl.Message(content="",  author="Infinity") 
+    async def StreamAgentResponse(prompt, forUris= False ):
+        
+        message = agents_client.messages.create(
+                    thread_id=thread.id,
+                    role=MessageRole.USER,
+                    content=prompt,
+                    
+                )
+        result = ""
+        
+        with agents_client.runs.stream(thread_id=thread.id, agent_id=agent.id) as stream:         
+            for event_type, event_data, _ in stream:
+                if isinstance(event_data, MessageDeltaChunk): 
+                    if not forUris:       
+                        await answerMsg.stream_token(event_data.text)    
+                        if event_data.delta.content and isinstance(event_data.delta.content[0], MessageDeltaTextContent):
+                            delta_text_content = event_data.delta.content[0]
+                            if delta_text_content.text and delta_text_content.text.annotations:
+                                for delta_annotation in delta_text_content.text.annotations:
+                                    if isinstance(delta_annotation, MessageDeltaTextUrlCitationAnnotation):                                                 
+                                        await answerMsg.stream_token(f"\nCitation: [{delta_annotation.url_citation.title}]({delta_annotation.url_citation.url})")
                     
                 response_message = agents_client.messages.get_last_message_by_role(thread_id=thread.id, role=MessageRole.AGENT)
                 
@@ -313,20 +404,26 @@ async def on_message(message: cl.Message):
         
             return result
         
+    try:
         await StreamAgentResponse(message.content)
-  
+    except Exception as e:
+        await returnError()
+        logger.error("Error while streaming response!\n%s",e)
+
+    try:
         prompt = "give me response in the following JSON format {\"Q1\":\"..\",\"Q2\":\"..\",\"Q3\":\"..\",\"Q4\":\"..\"}. " \
         "Q1,Q2,Q3 and Q4 are for the follow up questions to the prompt. Do not ask any clarifying questions. Your prompt is this -" + message.content
 
         questions = await StreamAgentResponse(prompt,True)        
     
         questions = json.loads(questions)
-        questions_element_props = await get_questions(questions) 
+        questions_element_props = await get_questionsProps(questions) 
         questions_element = cl.CustomElement(name="FollowUpQuestions",props=questions_element_props )
         msg = cl.Message(content="",elements=[questions_element], author="Infinity")   
         await msg.send()
     except Exception as e :
-        print(e)
+        # await returnError()
+        logger.error("Error while building follow up questions!\n%s",e)
 
     # prompt = "give me response in the following JSON format {\"Uris\":\"..\" }. " \
     # "In Uris field, give me an array of 10 URLs related to the prompt. Your prompt is this - " + message.content

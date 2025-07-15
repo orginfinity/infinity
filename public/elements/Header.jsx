@@ -158,6 +158,7 @@ const Header = () =>
                     </td>
                     <td>
                         <button className="headerbutton  bg-accent" onClick={imagesClicked}   id="images"  >IMAGES</button>
+                    
                     </td>
                 </tr>
             </table> 
