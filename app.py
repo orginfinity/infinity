@@ -247,7 +247,7 @@ async def get_questionsProps(questions):
         if questions["Q2"] != None:
             props["question2"] =questions["Q2"]
         if questions["Q3"] != None:
-            props["questio3"] =questions["Q3"]
+            props["question3"] =questions["Q3"]
         if questions["Q4"] != None:
             props["question4"] =questions["Q4"]
  
@@ -371,7 +371,6 @@ async def on_message(message: cl.Message):
         Header  = cl.CustomElement(name="Header",props=headerProps, display="inline")   
         headerMsg = cl.Message(content="",elements=[Header],  author="Infinity")
         await headerMsg.send()
-    
 
     answerMsg = cl.Message(content="",  author="Infinity") 
     async def StreamAgentResponse(prompt, forUris= False ):
@@ -396,11 +395,11 @@ async def on_message(message: cl.Message):
                                     if isinstance(delta_annotation, MessageDeltaTextUrlCitationAnnotation):                                                 
                                         await answerMsg.stream_token(f"\nCitation: [{delta_annotation.url_citation.title}]({delta_annotation.url_citation.url})")
                     
-                response_message = agents_client.messages.get_last_message_by_role(thread_id=thread.id, role=MessageRole.AGENT)
-                
-                if response_message:
-                    for text_message in response_message.text_messages:
-                        result += text_message.text.value
+            response_message = agents_client.messages.get_last_message_by_role(thread_id=thread.id, role=MessageRole.AGENT)
+            
+            if response_message:
+                for text_message in response_message.text_messages:
+                    result += text_message.text.value
         
             return result
         
