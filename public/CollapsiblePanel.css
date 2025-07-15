@@ -153,7 +153,7 @@ figure {
 .error
 {
   font-size: large;
-  color:red
+  
 }
 
 .errorPanel{
@@ -163,4 +163,18 @@ figure {
  
   background-color: gray;  
   border-radius: 300px;
+}
+
+.headertable{
+   padding-top: 20px;
+}
+
+.prompt
+{
+  border-top: 1px solid gray;
+  border-bottom: 1px solid gray;;
+  padding-top: 50px;
+  padding-bottom: 25px;
+  font-size: larger;
+  text-align: left;
 }

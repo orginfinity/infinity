@@ -266,6 +266,7 @@ messages = defaultdict(int)
 project_client = None
 agents_client= None
 agent = None 
+   
 @cl.on_chat_start
 async def on_chat_start():  
     message_history = [{"role": "system", "content": system_content}] 
@@ -275,7 +276,7 @@ async def on_chat_start():
         project_client = cl.user_session.get("project_client")
         if project_client == None:
             project_client = AIProjectClient(endpoint= agent_uri,credential=DefaultAzureCredential())
-            cl.user_session.set("project_client", project_client)
+            cl.user_session.set("project_client", project_client) 
             
     except Exception as e: 
         logger.error("Error while creating project_client: \n%s",e)
@@ -284,18 +285,18 @@ async def on_chat_start():
     try:
         agents_client = cl.user_session.get("agents_client")
         if agents_client == None:
-            agents_client = project_client.agents 
-            cl.user_session.set("agents_client", agents_client)
+            agents_client = project_client.agents             
+            cl.user_session.set("agents_client", agents_client) 
             
     except Exception as e: 
         logger.error("Error while creating agents_client: \n%s",e)
         return 
  
     try:
-        agent = cl.user_session.get("agents_agentclient")
+        agent = cl.user_session.get("agent")
         if agent == None:
             agent = agents_client.get_agent("asst_58piOsPpG4mOb2CdVWZC9uPF")
-            cl.user_session.set("agent", agent)
+            cl.user_session.set("agent", agent) 
             
     except Exception as e: 
         logger.error("Error while creating agent: \n%s",e) 
@@ -306,6 +307,11 @@ async def on_chat_start():
         if thread == None:
             thread = agents_client.threads.create()
             cl.user_session.set("thread", thread)
+
+        thread2 = cl.user_session.get("thread2")
+        if thread2 == None:
+            thread2 = agents_client.threads.create()
+            cl.user_session.set("thread2", thread2)
             
     except Exception as e: 
         logger.error("Error while creating agent: \n%s",e) 
@@ -329,11 +335,11 @@ def checkForSessionVariables():
         agent = cl.user_session.get("agent")
         logger = cl.user_session.get("logger")
         thread = cl.user_session.get("thread")
+        thread2 = cl.user_session.get("thread2")
     except Exception as e:
         return False
-    
 
-    if project_client == None or agents_client == None or agent == None or  thread == None or logger == None:
+    if project_client == None or agents_client == None or agent == None or  thread == None or logger == None or thread2 == None:
             return False
     
     return True
@@ -353,7 +359,8 @@ async def sendResponseMessage(message: cl.Message):
 
         if sources_element_props["sourceCount"] != 0 or images_element_props["imagesCount"] != 0:
             headerProps = sources_element_props | images_element_props
-            
+            headerProps["prompt"] = message.content
+
             Header  = cl.CustomElement(name="Header",props=headerProps, display="inline")   
             headerMsg = cl.Message(content="",elements=[Header],  author="Infinity")
             await headerMsg.send()
@@ -373,7 +380,12 @@ async def StreamAgentResponse(prompt, forUris= False ):
         agents_client = cl.user_session.get("agents_client")
         agent = cl.user_session.get("agent")
         logger = cl.user_session.get("logger")
-        thread = cl.user_session.get("thread") 
+
+        if not forUris:
+            thread = cl.user_session.get("thread") 
+        else:
+            thread = cl.user_session.get("thread2")
+
         message = agents_client.messages.create(thread_id=thread.id,role=MessageRole.USER,content=prompt)
         result = ""
         answerMsg = cl.Message(content="",  author="Infinity") 
@@ -399,7 +411,7 @@ async def StreamAgentResponse(prompt, forUris= False ):
     except Exception as e:
         # await returnError()
         logger.error("Error while streaming response!\n%s",e)
-        return False
+        return False 
     
 async def sendFollowupQuestions(message):
 

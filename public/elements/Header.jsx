@@ -162,7 +162,8 @@ const Header = () =>
      
     return (
         <div id="headerelem">
-            <table>
+             
+            <table  > 
                 <tr>
                     <td>
                         <button className="headerbutton  bg-accent" onClick={answerClicked}  id="answer" style={{display:"inline"}}  >ANSWER</button>
