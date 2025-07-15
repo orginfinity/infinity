@@ -342,12 +342,12 @@ async def returnError():
     image = cl.Image(path="./maintenance.gif", name="image1", display="inline") 
     await cl.Message(
             content="There was an error establishing session. We are on it!",
-            elements=[image],
+            # elements=[image],
         ).send()
 
 async def sendResponseMessage(message: cl.Message):
     try:
-        logger = cl.user_session.get("logger")
+        logger = cl.user_session.get("logger") 
         sources_element_props = await get_websites_fromgoogle(message.content)   
         images_element_props = await get_images_fromgoogle(message.content)
 
@@ -359,8 +359,10 @@ async def sendResponseMessage(message: cl.Message):
             await headerMsg.send()
 
         response, result = await StreamAgentResponse(message.content)
+  
         return result
     except Exception as e:
+   
         await returnError()
         logger.error("Error while streaming message\n%s",e)
         return False
@@ -417,67 +419,22 @@ async def sendFollowupQuestions(message):
         logger.error("Error while building follow up questions!\n%s",e)
 
 import asyncio
+import threading
+
 @cl.on_message
 async def on_message(message: cl.Message): 
     logger = cl.user_session.get("logger")
+     
     if checkForSessionVariables() == False:      
         await returnError()
-        return
-    try:
-        result = await sendResponseMessage(message)  
-        if(result):
-            await sendFollowupQuestions(message)
+        return 
+    try: 
          
+        result = await sendResponseMessage(message)
+
+        if result:
+            await sendFollowupQuestions(message)
+          
     except Exception as e: 
         logger.error("Error in OnMessage:\n%s",e)
-    # try:
-    #     await StreamAgentResponse(message.content)
-    # except Exception as e:
-    #     await returnError()
-    #     logger.error("Error while streaming response!\n%s",e)
-    #     return
-
-    # try:
-    #     await sendFollowupQuestions(message)
-    # except Exception as e :
-    #     # await returnError()
-    #     logger.error("Error while building follow up questions!\n%s",e)
-
-    # prompt = "give me response in the following JSON format {\"Uris\":\"..\" }. " \
-    # "In Uris field, give me an array of 10 URLs related to the prompt. Your prompt is this - " + message.content
-
-    # Uris = await StreamAgentResponse(prompt,True)
-    
-    # websites = json.loads(Uris)
-    # websites_element_props = await getWebsitesProps(websites) 
-    # websites_element = cl.CustomElement(name="Websites",props=websites_element_props )
-    # msg = cl.Message(content="",elements=[websites_element], author="Infinity")   
-    # await msg.send()
-
-    # message_history = cl.user_session.get("message_history") 
-    # message_history.append({"role": "user", "content": message.content+ " . Response should be in markdown format."})
-    
- 
-    # answerMsg = cl.Message(content="",  author="Infinity") 
-    # answer = ""
-       
-
-# @cl.on_message
-# async def main(message: cl.Message):
-#     # Your custom logic goes here...
-
-#     # Send a response back to the user
-#     await cl.Message(
-#         content=getKeyValue("test"),
-#     ).send()
-
-#from flask import Flask
-
-#app = Flask(__name__)
-
-#@app.route('/')
-#def hello_world():
-    #return '<html>Hello World!</html>'
-
-#if __name__ == '__main__':
- #   app.run()
+   
