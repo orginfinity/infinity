@@ -418,7 +418,9 @@ async def sendFollowupQuestions(message):
     try:
         logger = cl.user_session.get("logger")
         prompt = "give me response in the following JSON format {\"Q1\":\"..\",\"Q2\":\"..\",\"Q3\":\"..\",\"Q4\":\"..\"}. " \
-            "Q1,Q2,Q3 and Q4 are for the follow up questions to the prompt. Do not ask any clarifying questions. Your prompt is this -" + message.content
+            "Q1,Q2,Q3 and Q4 are for the additional prompts you may want to suggest the user based on the prompt. Do not respond with questions but statements." \
+            " Do not ask any clarifying questions. Do not ask any personal questions about the user." \
+             "     Your prompt is this -" + message.content
 
         questions, result = await StreamAgentResponse(prompt,True)        
 
