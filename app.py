@@ -1,8 +1,6 @@
 import chainlit as cl
 from azure.identity import DefaultAzureCredential
-from azure.keyvault.secrets import SecretClient
-
-    
+from azure.keyvault.secrets import SecretClient 
 import chainlit as cl
 # Import packages
 import os
@@ -43,9 +41,8 @@ def getKeyValue(secret_name):
         return retrieved_secret.value
     except Exception as e:
         print(e)
-        return None
-
-
+        return None 
+    
 google_search_uri = getKeyValue("google-search-uri")
 google_fav_icons_uri = getKeyValue("google-fav-icons-uri") 
 agent_uri =  getKeyValue("agent-uri")  
@@ -60,8 +57,7 @@ model ="gpt-4o"
 system_content = "Do not ask any clarifying questions."
 max_retries = 5
 timeout = 30
-debug = "true" 
-
+debug = "true"  
  
 import os
 from typing import Any
@@ -73,9 +69,7 @@ from azure.ai.agents.models import (
     MessageDeltaTextUrlCitationAnnotation,
     MessageDeltaTextContent, 
 )
- 
-
-
+  
 async def getWebsitesProps(websites,titles,favicons, contents,thumbnails):
     # logger.info("Contents: %s", websites)
     """Pretending to fetch data from linear"""
@@ -109,6 +103,7 @@ async def getWebsitesProps(websites,titles,favicons, contents,thumbnails):
         logger.error("Error while preparing websites props \n %s",e)
     finally: 
         websitesProps["sourceCount"] = sourceCount
+        
     return websitesProps
 
 class imageFromGoogle:
@@ -158,7 +153,7 @@ async def getImagesProps(images):
         logger.info("Error while populating image props from Google\n%s",e)
     finally:
         imagesProps["imagesCount"] = imageCount
-     
+  
     return imagesProps
 
 async def get_images_fromgoogle(prompt):
@@ -236,7 +231,7 @@ async def get_websites_fromgoogle(prompt):
     finally:
         props =  await getWebsitesProps(websites,titles, favicons, contents,thumbnails)       
         props["prompt"] = prompt
-
+    
     return props 
 
 async def get_questionsProps(questions):
@@ -349,40 +344,37 @@ async def returnError():
             content="There was an error establishing session. We are on it!",
             elements=[image],
         ).send()
-    
 
-@cl.on_message
-async def on_message(message: cl.Message): 
-     
-    if checkForSessionVariables() == False:      
+async def sendResponseMessage(message: cl.Message):
+    try:
+        logger = cl.user_session.get("logger")
+        sources_element_props = await get_websites_fromgoogle(message.content)   
+        images_element_props = await get_images_fromgoogle(message.content)
+
+        if sources_element_props["sourceCount"] != 0 or images_element_props["imagesCount"] != 0:
+            headerProps = sources_element_props | images_element_props
+            
+            Header  = cl.CustomElement(name="Header",props=headerProps, display="inline")   
+            headerMsg = cl.Message(content="",elements=[Header],  author="Infinity")
+            await headerMsg.send()
+
+        response, result = await StreamAgentResponse(message.content)
+        return result
+    except Exception as e:
         await returnError()
-     
-    agents_client = cl.user_session.get("agents_client")
-    agent = cl.user_session.get("agent")
-    logger = cl.user_session.get("logger")
-    thread = cl.user_session.get("thread") 
-  
-    sources_element_props = await get_websites_fromgoogle(message.content)   
-    images_element_props = await get_images_fromgoogle(message.content)
+        logger.error("Error while streaming message\n%s",e)
+        return False
+    
+async def StreamAgentResponse(prompt, forUris= False ):
 
-    if sources_element_props["sourceCount"] != 0 or images_element_props["imagesCount"] != 0:
-        headerProps = sources_element_props | images_element_props
-        
-        Header  = cl.CustomElement(name="Header",props=headerProps, display="inline")   
-        headerMsg = cl.Message(content="",elements=[Header],  author="Infinity")
-        await headerMsg.send()
-
-    answerMsg = cl.Message(content="",  author="Infinity") 
-    async def StreamAgentResponse(prompt, forUris= False ):
-        
-        message = agents_client.messages.create(
-                    thread_id=thread.id,
-                    role=MessageRole.USER,
-                    content=prompt,
-                    
-                )
+    try:
+        agents_client = cl.user_session.get("agents_client")
+        agent = cl.user_session.get("agent")
+        logger = cl.user_session.get("logger")
+        thread = cl.user_session.get("thread") 
+        message = agents_client.messages.create(thread_id=thread.id,role=MessageRole.USER,content=prompt)
         result = ""
-        
+        answerMsg = cl.Message(content="",  author="Infinity") 
         with agents_client.runs.stream(thread_id=thread.id, agent_id=agent.id) as stream:         
             for event_type, event_data, _ in stream:
                 if isinstance(event_data, MessageDeltaChunk): 
@@ -401,28 +393,55 @@ async def on_message(message: cl.Message):
                 for text_message in response_message.text_messages:
                     result += text_message.text.value
         
-            return result
-        
-    try:
-        await StreamAgentResponse(message.content)
+            return result,True
     except Exception as e:
-        await returnError()
+        # await returnError()
         logger.error("Error while streaming response!\n%s",e)
+        return False
+    
+async def sendFollowupQuestions(message):
 
     try:
+        logger = cl.user_session.get("logger")
         prompt = "give me response in the following JSON format {\"Q1\":\"..\",\"Q2\":\"..\",\"Q3\":\"..\",\"Q4\":\"..\"}. " \
-        "Q1,Q2,Q3 and Q4 are for the follow up questions to the prompt. Do not ask any clarifying questions. Your prompt is this -" + message.content
+            "Q1,Q2,Q3 and Q4 are for the follow up questions to the prompt. Do not ask any clarifying questions. Your prompt is this -" + message.content
 
-        questions = await StreamAgentResponse(prompt,True)        
-    
+        questions, result = await StreamAgentResponse(prompt,True)        
+
         questions = json.loads(questions)
         questions_element_props = await get_questionsProps(questions) 
         questions_element = cl.CustomElement(name="FollowUpQuestions",props=questions_element_props )
         msg = cl.Message(content="",elements=[questions_element], author="Infinity")   
         await msg.send()
-    except Exception as e :
-        # await returnError()
+    except Exception as e:
         logger.error("Error while building follow up questions!\n%s",e)
+
+import asyncio
+@cl.on_message
+async def on_message(message: cl.Message): 
+    logger = cl.user_session.get("logger")
+    if checkForSessionVariables() == False:      
+        await returnError()
+        return
+    try:
+        result = await sendResponseMessage(message)  
+        if(result):
+            await sendFollowupQuestions(message)
+         
+    except Exception as e: 
+        logger.error("Error in OnMessage:\n%s",e)
+    # try:
+    #     await StreamAgentResponse(message.content)
+    # except Exception as e:
+    #     await returnError()
+    #     logger.error("Error while streaming response!\n%s",e)
+    #     return
+
+    # try:
+    #     await sendFollowupQuestions(message)
+    # except Exception as e :
+    #     # await returnError()
+    #     logger.error("Error while building follow up questions!\n%s",e)
 
     # prompt = "give me response in the following JSON format {\"Uris\":\"..\" }. " \
     # "In Uris field, give me an array of 10 URLs related to the prompt. Your prompt is this - " + message.content

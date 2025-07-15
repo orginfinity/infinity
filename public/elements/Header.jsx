@@ -139,11 +139,25 @@ const answerClicked = (elem) =>
             parentElem = parentElem.parentNode
         }
     }
-  
+
+const enableButtons = () =>
+{
+   btnSources = document.getElementById('sources')
+   if(props.sourceCount > 0){
+    btnSources.style.display = "inline"
+   }
+
+   
+   btnImages = document.getElementById('images')
+   if(props.imagesCount > 0){
+    btnImages.style.display = "inline"
+   }
+}
+
 const Header = () =>
 {    
     useEffect(() => { 
-     
+        enableButtons()
       }, []); 
      
     return (
@@ -151,7 +165,7 @@ const Header = () =>
             <table>
                 <tr>
                     <td>
-                        <button className="headerbutton  bg-accent" onClick={answerClicked}  id="answer"  >ANSWER</button>
+                        <button className="headerbutton  bg-accent" onClick={answerClicked}  id="answer" style={{display:"inline"}}  >ANSWER</button>
                     </td>
                     <td>
                          <button className="headerbutton  bg-accent"  onClick={sourcesClicked}  id="sources"  >SOURCES</button>
