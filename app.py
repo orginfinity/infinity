@@ -434,21 +434,54 @@ async def sendFollowupQuestions(message):
 
 import asyncio
 import threading
+@cl.action_callback("action_button")
+async def on_action(action):
+    try:
+        correlationId = cl.user_session.get("correlationId")
+        clientSummaries = read_summary(correlationId)
 
+        for summary in clientSummaries:
+            msg = cl.Message(content=summary[0])
+            await msg.send()
+            update_summary(1,correlationId)
+    except Exception as ex:
+        print(ex)
+
+from database import  *
+from serviceBus import *
 @cl.on_message
-async def on_message(message: cl.Message): 
-    logger = cl.user_session.get("logger")
-     
-    if checkForSessionVariables() == False:      
-        await returnError()
-        return 
-    try: 
-         
-        result = await sendResponseMessage(message)
+async def on_message(message: cl.Message):
+    correlationId = str(uuid.uuid4())
+    try:
+        cl.user_session.set("correlationId", correlationId)
+        create_prompt(message.content,0,uuid.uuid4())
 
-        if result:
-            await sendFollowupQuestions(message)
-          
-    except Exception as e: 
-        logger.error("Error in OnMessage:\n%s",e)
-   
+        prompt = {
+            "prompt": message.content,
+            "correlationId": correlationId
+        }
+
+        publish_message_to_topic(json.dumps(prompt))
+        propsVar = {"correlationId": correlationId}
+        Research = cl.CustomElement(name="Research", props=propsVar, display="inline")
+        researchMsg = cl.Message(content="", elements=[Research],author="Infinity")
+        await researchMsg.send()
+    except Exception as ex:
+        print(ex)
+
+    logger = cl.user_session.get("logger")
+   #
+   #
+   #  if checkForSessionVariables() == False:
+   #      await returnError()
+   #      return
+   #  try:
+   #
+   #      result = await sendResponseMessage(message)
+   #
+   #      if result:
+   #          await sendFollowupQuestions(message)
+   #
+   #  except Exception as e:
+   #      logger.error("Error in OnMessage:\n%s",e)
+   #

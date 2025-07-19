@@ -5,3 +5,4 @@ azure-identity
 openai
 azure-ai-ml
 azure-ai-projects
+node-cron
