@@ -1,3 +1,5 @@
+import uuid
+
 import chainlit as cl
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient 
@@ -325,7 +327,10 @@ async def on_chat_start():
             
     except Exception as e: 
         logger.error("Error while logger: \n%s",e) 
-        return   
+        return
+
+from database import establishDbConnection
+establishDbConnection()
 
 def checkForSessionVariables():
  
@@ -369,7 +374,6 @@ async def sendResponseMessage(message: cl.Message):
   
         return result
     except Exception as e:
-   
         await returnError()
         logger.error("Error while streaming message\n%s",e)
         return False
@@ -409,41 +413,70 @@ async def StreamAgentResponse(prompt, forUris= False ):
         
             return result,True
     except Exception as e:
-        # await returnError()
-        logger.error("Error while streaming response!\n%s",e)
         return False 
     
-async def sendFollowupQuestions(message):
-
+def sendFollowupQuestions(prompt):
     try:
-        logger = cl.user_session.get("logger")
         prompt = "give me response in the following JSON format {\"Q1\":\"..\",\"Q2\":\"..\",\"Q3\":\"..\",\"Q4\":\"..\"}. " \
-            "Q1,Q2,Q3 and Q4 are for the additional prompts you may want to suggest the user based on the prompt. Do not respond with questions but statements." \
-            " Do not ask any clarifying questions. Do not ask any personal questions about the user." \
-             "     Your prompt is this -" + message.content
+                 "Q1,Q2,Q3 and Q4 are for the additional prompts you may want to suggest the user based on the prompt. Do not respond with questions but statements." \
+                 " Do not ask any clarifying questions. Do not ask any personal questions about the user." \
+                 "     Your prompt is this - " + prompt
 
-        questions, result = await StreamAgentResponse(prompt,True)        
+        from openai import OpenAI
+        client = OpenAI()
+        client.api_key = getKeyValue("azure-openai-key")
+        response = client.responses.create(
+            model="gpt-4.1",
+            input=prompt
+        )
+        return response.output_text
+        # print(response.output_text)
 
-        questions = json.loads(questions)
-        questions_element_props = await get_questionsProps(questions) 
-        questions_element = cl.CustomElement(name="FollowUpQuestions",props=questions_element_props )
-        msg = cl.Message(content="",elements=[questions_element], author="Infinity")   
-        await msg.send()
     except Exception as e:
-        logger.error("Error while building follow up questions!\n%s",e)
+        print("Error while building follow up questions!\n%s", e)
 
-import asyncio
-import threading
+from typing import Dict, Optional
+@cl.oauth_callback
+def oauth_callback(
+  provider_id: str,
+  token: str,
+  raw_user_data: Dict[str, str],
+  default_user: cl.User,
+) -> Optional[cl.User]:
+  return default_user
+
 @cl.action_callback("action_button")
 async def on_action(action):
     try:
         correlationId = cl.user_session.get("correlationId")
-        clientSummaries = read_summary(correlationId)
+        clientSummaries = get_matching_question_action(correlationId)
 
+        count = 0
+        propsVar = {}
         for summary in clientSummaries:
-            msg = cl.Message(content=summary[0])
-            await msg.send()
-            update_summary(1,correlationId)
+
+            promptVar = "prompt" + str(count)
+            actionVar = "action" + str(count)
+            sourcesVar = "sources" + str(count)
+            faviconVar = "favicon" + str(count)
+
+            propsVar[promptVar] = summary[0]
+            propsVar[actionVar] = summary[1]
+            propsVar[sourcesVar] = summary[3]
+            propsVar[faviconVar] = summary[4]
+
+            update_stage(1, summary[0], correlationId)
+            count += 1
+
+        if count > 0:
+            propsVar["promptactioncount"] = count
+            ResearchSteps = cl.CustomElement(name="ResearchSteps", props=propsVar, display="inline")
+            ResearchStepsMsg = cl.Message(content="", elements=[ResearchSteps], author="Infinity")
+            await ResearchStepsMsg.send()
+
+            ResearchStepsMsg = cl.Message(content="", author="Infinity")
+            await ResearchStepsMsg.send()
+
     except Exception as ex:
         print(ex)
 
@@ -463,9 +496,10 @@ async def on_message(message: cl.Message):
 
         publish_message_to_topic(json.dumps(prompt))
         propsVar = {"correlationId": correlationId}
-        Research = cl.CustomElement(name="Research", props=propsVar, display="inline")
-        researchMsg = cl.Message(content="", elements=[Research],author="Infinity")
-        await researchMsg.send()
+        ResearchTopHeader = cl.CustomElement(name="ResearchTopHeader", props=propsVar, display="inline")
+        researchTopHeaderMsg = cl.Message(content="", elements=[ResearchTopHeader],author="Infinity")
+        await researchTopHeaderMsg.send()
+
     except Exception as ex:
         print(ex)
 
