@@ -329,8 +329,8 @@ async def on_chat_start():
         logger.error("Error while logger: \n%s",e) 
         return
 
-from database import establishDbConnection
-establishDbConnection()
+# from database import establishDbConnection
+# establishDbConnection()
 
 def checkForSessionVariables():
  
@@ -484,38 +484,37 @@ from database import  *
 from serviceBus import *
 @cl.on_message
 async def on_message(message: cl.Message):
-    correlationId = str(uuid.uuid4())
+    # correlationId = str(uuid.uuid4())
+    # try:
+    #     cl.user_session.set("correlationId", correlationId)
+    #     create_prompt(message.content,0,uuid.uuid4())
+    #
+    #     prompt = {
+    #         "prompt": message.content,
+    #         "correlationId": correlationId
+    #     }
+    #
+    #     publish_message_to_topic(json.dumps(prompt))
+    #     propsVar = {"correlationId": correlationId}
+    #     ResearchTopHeader = cl.CustomElement(name="ResearchTopHeader", props=propsVar, display="inline")
+    #     researchTopHeaderMsg = cl.Message(content="", elements=[ResearchTopHeader],author="Infinity")
+    #     await researchTopHeaderMsg.send()
+    #
+    # except Exception as ex:
+    #     print(ex)
+    #
+    # logger = cl.user_session.get("logger")
+   #
+   #
+    if checkForSessionVariables() == False:
+        await returnError()
+        return
     try:
-        cl.user_session.set("correlationId", correlationId)
-        create_prompt(message.content,0,uuid.uuid4())
 
-        prompt = {
-            "prompt": message.content,
-            "correlationId": correlationId
-        }
+        result = await sendResponseMessage(message)
 
-        publish_message_to_topic(json.dumps(prompt))
-        propsVar = {"correlationId": correlationId}
-        ResearchTopHeader = cl.CustomElement(name="ResearchTopHeader", props=propsVar, display="inline")
-        researchTopHeaderMsg = cl.Message(content="", elements=[ResearchTopHeader],author="Infinity")
-        await researchTopHeaderMsg.send()
+        if result:
+            await sendFollowupQuestions(message)
 
-    except Exception as ex:
-        print(ex)
-
-    logger = cl.user_session.get("logger")
-   #
-   #
-   #  if checkForSessionVariables() == False:
-   #      await returnError()
-   #      return
-   #  try:
-   #
-   #      result = await sendResponseMessage(message)
-   #
-   #      if result:
-   #          await sendFollowupQuestions(message)
-   #
-   #  except Exception as e:
-   #      logger.error("Error in OnMessage:\n%s",e)
-   #
+    except Exception as e:
+        logger.error("Error in OnMessage:\n%s",e)
