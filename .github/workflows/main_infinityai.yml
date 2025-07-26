@@ -1,32 +1,32 @@
-# name: Linux Container Node Workflow
+name: Linux Container Node Workflow
 
-# on: [push]
+on: [push]
 
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-#     steps:
-#     - uses: actions/checkout@v2
+    steps:
+    - uses: actions/checkout@v2
 
-#     - uses: azure/docker-login@v1
-#       with:
-#         login-server: infinity.azurecr.io
-#         username: ${{ secrets.REGISTRY_USERNAME }}
-#         password: ${{ secrets.REGISTRY_PASSWORD }}
+    - uses: azure/docker-login@v1
+      with:
+        login-server: infinity.azurecr.io
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
 
-#     - run: |
-#         # docker build . -t infinity.azurecr.io/infinity:v1
-#         docker build . -t infinity.azurecr.io/infinity:v1 -f Dockerfile --build-arg FILENAME=app.py --build-arg PORT=8080 
-#         docker push infinity.azurecr.io/infinity:v1     
+    - run: |
+        # docker build . -t infinity.azurecr.io/infinity:v1
+        docker build . -t infinity.azurecr.io/infinity:v1 -f Dockerfile --build-arg FILENAME=app.py --build-arg PORT=8080 
+        docker push infinity.azurecr.io/infinity:v1     
 
-#     # - run: |
-#     #     # docker build . -t infinity.azurecr.io/hello-world
-#     #     docker build . -t infinity.azurecr.io/my-demo-app:hello-world -f Dockerfile  
-#     #     docker push infinity.azurecr.io/my-demo-app:hello-world
+    # - run: |
+    #     # docker build . -t infinity.azurecr.io/hello-world
+    #     docker build . -t infinity.azurecr.io/my-demo-app:hello-world -f Dockerfile  
+    #     docker push infinity.azurecr.io/my-demo-app:hello-world
 
-#     # - uses: azure/webapps-deploy@v2
-#     #   with:
-#     #     app-name: 'infinityai'
-#     #     publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-#     #     images: 'infinity.azurecr.io/infinity:${{ github.sha }}'
+    # - uses: azure/webapps-deploy@v2
+    #   with:
+    #     app-name: 'infinityai'
+    #     publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+    #     images: 'infinity.azurecr.io/infinity:${{ github.sha }}'
