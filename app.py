@@ -443,14 +443,14 @@ os.environ["OAUTH_GOOGLE_CLIENT_SECRET"] = getKeyValue("google-auth-secret")
 os.environ["CHAINLIT_AUTH_SECRET"] = getKeyValue("chainlit-secret")
 
 from typing import Dict, Optional
-# @cl.oauth_callback
-# def oauth_callback(
-#   provider_id: str,
-#   token: str,
-#   raw_user_data: Dict[str, str],
-#   default_user: cl.User,
-# ) -> Optional[cl.User]:
-#   return default_user
+@cl.oauth_callback
+def oauth_callback(
+  provider_id: str,
+  token: str,
+  raw_user_data: Dict[str, str],
+  default_user: cl.User,
+) -> Optional[cl.User]:
+  return default_user
 
 @cl.header_auth_callback
 def header_auth_callback(headers: Dict) -> Optional[cl.User]:
