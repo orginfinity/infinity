@@ -452,19 +452,20 @@ def oauth_callback(
 ) -> Optional[cl.User]:
   return default_user
 
-@cl.header_auth_callback
-def header_auth_callback(headers: Dict) -> Optional[cl.User]:
-  # Verify the signature of a token in the header (ex: jwt token)
-  # or check that the value is matching a row from your database
-  name = headers.get("name")
-  email = headers.get("email")
-  print(name)
-  if name != None:
-    cl.user_session.set("name", name)
-    cl.user_session.set("email", email)
-    return cl.User(identifier=name, metadata={"role": "user", "provider": "header"})
-  else:
-    return None
+
+# @cl.header_auth_callback
+# def header_auth_callback(headers: Dict) -> Optional[cl.User]:
+#   # Verify the signature of a token in the header (ex: jwt token)
+#   # or check that the value is matching a row from your database
+#   name = headers.get("name")
+#   email = headers.get("email")
+#   print(name)
+#   if name != None:
+#     cl.user_session.set("name", name)
+#     cl.user_session.set("email", email)
+#     return cl.User(identifier=name, metadata={"role": "user", "provider": "header"})
+#   else:
+#     return None
 
 @cl.action_callback("action_button")
 async def on_action(action):
