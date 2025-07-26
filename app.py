@@ -23,6 +23,9 @@ secrets = {}
 secrets["google-search-uri"] = None
 secrets["google-fav-icons-uri"] = None
 secrets["agent-uri"] = None
+secrets["google-auth-secret"] = None
+secrets["google-client-id"] = None
+secrets["chainlit-secret"] = None
 
 def getKeyValue(secret_name):
 
@@ -435,15 +438,28 @@ def sendFollowupQuestions(prompt):
     except Exception as e:
         print("Error while building follow up questions!\n%s", e)
 
+os.environ["OAUTH_GOOGLE_CLIENT_ID"] = getKeyValue("google-client-id")
+os.environ["OAUTH_GOOGLE_CLIENT_SECRET"] = getKeyValue("google-auth-secret")
+os.environ["CHAINLIT_AUTH_SECRET"] = getKeyValue("chainlit-secret")
+
 from typing import Dict, Optional
-@cl.oauth_callback
-def oauth_callback(
-  provider_id: str,
-  token: str,
-  raw_user_data: Dict[str, str],
-  default_user: cl.User,
-) -> Optional[cl.User]:
-  return default_user
+# @cl.oauth_callback
+# def oauth_callback(
+#   provider_id: str,
+#   token: str,
+#   raw_user_data: Dict[str, str],
+#   default_user: cl.User,
+# ) -> Optional[cl.User]:
+#   return default_user
+
+@cl.header_auth_callback
+def header_auth_callback(headers: Dict) -> Optional[cl.User]:
+  # Verify the signature of a token in the header (ex: jwt token)
+  # or check that the value is matching a row from your database
+  if headers.get("test-header") == "test-value":
+    return cl.User(identifier="admin", metadata={"role": "admin", "provider": "header"})
+  else:
+    return None
 
 @cl.action_callback("action_button")
 async def on_action(action):
