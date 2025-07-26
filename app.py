@@ -456,8 +456,10 @@ from typing import Dict, Optional
 def header_auth_callback(headers: Dict) -> Optional[cl.User]:
   # Verify the signature of a token in the header (ex: jwt token)
   # or check that the value is matching a row from your database
-  if headers.get("test-header") == "test-value":
-    return cl.User(identifier="admin", metadata={"role": "admin", "provider": "header"})
+  name = headers.get("name")
+  email = headers.get("email")
+  if name != None:
+    return cl.User(identifier=name, metadata={"role": "user", "provider": "header"})
   else:
     return None
 
