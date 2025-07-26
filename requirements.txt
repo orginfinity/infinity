@@ -5,4 +5,8 @@ azure-identity
 openai
 azure-ai-ml
 azure-ai-projects
-node-cron
+fastapi
+uvicorn
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
