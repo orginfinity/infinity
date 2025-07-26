@@ -458,6 +458,7 @@ def header_auth_callback(headers: Dict) -> Optional[cl.User]:
   # or check that the value is matching a row from your database
   name = headers.get("name")
   email = headers.get("email")
+  print(name)
   if name != None:
     cl.user_session.set("name", name)
     cl.user_session.set("email", email)
@@ -505,9 +506,10 @@ from serviceBus import *
 @cl.on_message
 async def on_message(message: cl.Message):
     name = cl.user_session.get("name")
+    print(name)
     headerMsg = cl.Message(content=name, author="Infinity")
     await headerMsg.send()
-    return 
+    return
     # correlationId = str(uuid.uuid4())
     # try:
     #     cl.user_session.set("correlationId", correlationId)
