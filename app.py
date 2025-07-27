@@ -445,16 +445,16 @@ os.environ["CHAINLIT_ROOT_PATH"] = "/"
 
 print(str(os.environ["OAUTH_GOOGLE_CLIENT_ID"]))
 print(str(os.environ["OAUTH_GOOGLE_CLIENT_SECRET"]))
-
-from typing import Dict, Optional
-@cl.oauth_callback
-def oauth_callback(
-  provider_id: str,
-  token: str,
-  raw_user_data: Dict[str, str],
-  default_user: cl.User,
-) -> Optional[cl.User]:
-  return default_user
+#
+# from typing import Dict, Optional
+# @cl.oauth_callback
+# def oauth_callback(
+#   provider_id: str,
+#   token: str,
+#   raw_user_data: Dict[str, str],
+#   default_user: cl.User,
+# ) -> Optional[cl.User]:
+#   return default_user
 
 
 # @cl.header_auth_callback
