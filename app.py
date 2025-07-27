@@ -441,7 +441,10 @@ def sendFollowupQuestions(prompt):
 os.environ["OAUTH_GOOGLE_CLIENT_ID"] = getKeyValue("google-client-id")
 os.environ["OAUTH_GOOGLE_CLIENT_SECRET"] = getKeyValue("google-auth-secret")
 os.environ["CHAINLIT_AUTH_SECRET"] = getKeyValue("chainlit-secret")
-os.environ["CHAINLIT_ROOT_PATH"] = "https://infinity.lemonmeadow-93bc07ae.westus2.azurecontainerapps.io/"
+os.environ["CHAINLIT_ROOT_PATH"] = "https://infinity.lemonmeadow-93bc07ae.westus2.azurecontainerapps.io"
+
+print(str(os.environ["OAUTH_GOOGLE_CLIENT_ID"]))
+print(str(os.environ["OAUTH_GOOGLE_CLIENT_SECRET"]))
 
 from typing import Dict, Optional
 @cl.oauth_callback
