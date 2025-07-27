@@ -16,8 +16,8 @@ from dotenv import load_dotenv
 from dotenv import dotenv_values
 from chainlit.input_widget import Select, Switch, Slider
 import json
-import requests 
-
+import requests
+from servicemanager import LogInfoMsg
 
 secrets = {}
 secrets["google-search-uri"] = None
@@ -271,9 +271,13 @@ messages = defaultdict(int)
 project_client = None
 agents_client= None
 agent = None 
-   
+
 @cl.on_chat_start
-async def on_chat_start():  
+async def on_chat_start():
+    Login = cl.CustomElement(name="Login",  display="inline")
+    loginMsg = cl.Message(content="", elements=[Login], author="Infinity")
+    await loginMsg.send()
+
     message_history = [{"role": "system", "content": system_content}] 
     cl.user_session.set("message_history",  message_history )
 
@@ -510,11 +514,7 @@ async def on_action(action):
 # from serviceBus import *
 @cl.on_message
 async def on_message(message: cl.Message):
-    name = cl.user_session.get("name")
-    print(name)
-    headerMsg = cl.Message(content=name, author="Infinity")
-    await headerMsg.send()
-    return
+
     # correlationId = str(uuid.uuid4())
     # try:
     #     cl.user_session.set("correlationId", correlationId)
@@ -548,4 +548,4 @@ async def on_message(message: cl.Message):
             await sendFollowupQuestions(message)
 
     except Exception as e:
-        logger.error("Error in OnMessage:\n%s",e)
+        print("Error in OnMessage:\n%s",e)
