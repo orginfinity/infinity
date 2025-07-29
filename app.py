@@ -1,23 +1,7 @@
 import uuid
-
+from azure.keyvault.secrets import SecretClient
 import chainlit as cl
-from azure.identity import DefaultAzureCredential
-from azure.keyvault.secrets import SecretClient 
-import chainlit as cl
-# Import packages
-import os
-import sys
-from openai import AsyncAzureOpenAI, AzureOpenAI
-import logging
-import chainlit as cl
-from azure.identity import DefaultAzureCredential    
-# from azure.identity import  get_bearer_token_provider, DefaultAzureCredentialOptions
-from dotenv import load_dotenv
-from dotenv import dotenv_values
-from chainlit.input_widget import Select, Switch, Slider
-import json
 import requests
-from servicemanager import LogInfoMsg
 
 secrets = {}
 secrets["google-search-uri"] = None
