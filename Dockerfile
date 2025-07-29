@@ -85,6 +85,7 @@ COPY chainlit.md .
 COPY ./.chainlit ./.chainlit
 COPY ./public ./public
 COPY ./public/CollapsiblePanel.css ./CollapsiblePanel.css
+COPY ./realtime ./realtime
 
 # The EXPOSE instruction informs Docker that the container listens on the specified network ports at runtime.
 # For more information, see: https://docs.docker.com/engine/reference/builder/#expose
