@@ -14,3 +14,4 @@ requests~=2.32.4
 azure-core~=1.35.0
 realtime~=2.6.0
 pyodbc~=5.2.0
+numpy
