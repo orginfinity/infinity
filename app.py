@@ -274,6 +274,7 @@ agent = None
 @cl.on_chat_start
 async def on_chat_start():
 
+    await setup_openai_realtime()
 
     message_history = [{"role": "system", "content": system_content}] 
     cl.user_session.set("message_history",  message_history )
@@ -558,8 +559,6 @@ async def window_message(message: str):
         if len(name) == 0:
             name = "default"
         cl.user_session.set("username",name)
-
-        await setup_openai_realtime()
 
 from realtime import RealtimeClient
 from realtime.tools import tools
