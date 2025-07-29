@@ -1,8 +1,8 @@
-chainlit
-python-dotenv
+chainlit~=2.6.2
+python-dotenv~=1.1.1
 azure-keyvault-secrets
 azure-identity
-openai
+openai~=1.97.0
 azure-ai-ml
 azure-ai-projects
 fastapi
@@ -10,3 +10,7 @@ uvicorn
 google-auth
 google-auth-oauthlib
 google-auth-httplib2
+requests~=2.32.4
+azure-core~=1.35.0
+realtime~=2.6.0
+pyodbc~=5.2.0
