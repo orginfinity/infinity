@@ -335,7 +335,8 @@ async def on_chat_start():
         logger.error("Error while logger: \n%s",e) 
         return
 
-    await cl.send_window_message("Server: Hello from Chainlit")
+    content =  "started"
+    await cl.send_window_message(content)
 # from database import establishDbConnection
 # establishDbConnection()
 
@@ -449,31 +450,6 @@ os.environ["CHAINLIT_ROOT_PATH"] = "/"
 
 print(str(os.environ["OAUTH_GOOGLE_CLIENT_ID"]))
 print(str(os.environ["OAUTH_GOOGLE_CLIENT_SECRET"]))
-#
-# from typing import Dict, Optional
-# @cl.oauth_callback
-# def oauth_callback(
-#   provider_id: str,
-#   token: str,
-#   raw_user_data: Dict[str, str],
-#   default_user: cl.User,
-# ) -> Optional[cl.User]:
-#   return default_user
-
-
-# @cl.header_auth_callback
-# def header_auth_callback(headers: Dict) -> Optional[cl.User]:
-#   # Verify the signature of a token in the header (ex: jwt token)
-#   # or check that the value is matching a row from your database
-#   name = headers.get("name")
-#   email = headers.get("email")
-#   print(name)
-#   if name != None:
-#     cl.user_session.set("name", name)
-#     cl.user_session.set("email", email)
-#     return cl.User(identifier=name, metadata={"role": "user", "provider": "header"})
-#   else:
-#     return None
 
 @cl.action_callback("action_button")
 async def on_action(action):
@@ -554,11 +530,11 @@ async def on_message(message: cl.Message):
 async def window_message(message: str):
 
     first_key = next(iter(message))
-    if(first_key == "name"):
-        name = message[first_key].split(" ")[1]
-        if len(name) == 0:
+    if(first_key == "email"):
+        email = message[first_key]
+        if len(email) == 0:
             name = "default"
-        cl.user_session.set("username",name)
+        cl.user_session.set("useremail",email)
 
 from realtime import RealtimeClient
 from realtime.tools import tools
@@ -625,9 +601,10 @@ async def on_audio_start():
             await cl.Message(content="Still setting up audio connectors. Please try again").send()
             return
 
-        username = cl.user_session.get("username")
-        if username == "default":
-            await cl.Message(content="Please login to experience audio chat").send()
+        useremail = cl.user_session.get("useremail")
+        if useremail == None or  useremail == "" or useremail == "default":
+            content = "userpanel:Please login to exprience audio chat."
+            await cl.send_window_message(content)
             return
 
 
@@ -649,7 +626,6 @@ async def on_audio_chunk(chunk: cl.InputAudioChunk):
         await openai_realtime.append_input_audio(chunk.data)
     else:
         logger.info("RealtimeClient is not connected")
-
 
 @cl.on_audio_end
 @cl.on_chat_end
