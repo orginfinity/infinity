@@ -486,11 +486,51 @@ async def on_action(action):
     except Exception as ex:
         print(ex)
 
-# from database import  *
-# from serviceBus import *
+MaxRequestCount = 2
+
+async def validate():
+    useremail = cl.user_session.get("useremail")
+    if useremail != None and useremail != '' and useremail != "default":
+        response = requests.get("http://127.0.0.1:8086/requestcount/email/" + useremail)
+        if response.text == 'false':
+            content = "maxpremiumlimitreached"
+            await cl.send_window_message(content)
+            return False
+        else:
+            try:
+                requests.post("http://127.0.0.1:8086/requestcount/email/" + useremail)
+                return  True
+            except Exception as e:
+                return  False
+                print(e)
+    else:
+        client_ip = cl.user_session.get("client_ip")
+        if client_ip == None:
+            client_ip = str(uuid.uuid4())
+            cl.user_session.set("client_ip", client_ip)
+
+        response = requests.get("http://127.0.0.1:8086/requestcount/ip/" + client_ip)
+        if response.text == 'false':
+            content = "maxlimitreached"
+            await cl.send_window_message(content)
+            return False
+        else:
+            try:
+                requests.post("http://127.0.0.1:8086/requestcount/ip/" + client_ip)
+                return True
+            except Exception as e:
+                return False
+                print(e)
+
+from fastapi import Request
 @cl.on_message
 async def on_message(message: cl.Message):
+    content = "closeuserpanel"
+    await cl.send_window_message(content)
 
+    isValid = await validate()
+    if not isValid:
+        return
     # correlationId = str(uuid.uuid4())
     # try:
     #     cl.user_session.set("correlationId", correlationId)
@@ -596,6 +636,10 @@ async def setup_openai_realtime():
 @cl.on_audio_start
 async def on_audio_start():
     try:
+        isValid = await validate()
+        if not isValid:
+            return
+
         openai_realtime: RealtimeClient = cl.user_session.get("openai_realtime")
         if openai_realtime == None:
             await cl.Message(content="Still setting up audio connectors. Please try again").send()
