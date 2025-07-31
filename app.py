@@ -491,16 +491,16 @@ MaxRequestCount = 2
 async def validate():
     useremail = cl.user_session.get("useremail")
     if useremail != None and useremail != '' and useremail != "default":
-        # response = requests.get("http://127.0.0.1:8086/requestcount/email/" + useremail)
-        response = requests.get("https://infinitydatabase.azurewebsites.net/requestcount/email/" + useremail)
+        response = requests.get("http://127.0.0.1:8086/requestcount/email/" + useremail)
+        # response = requests.get("https://infinitydatabase.azurewebsites.net/requestcount/email/" + useremail)
         if response.text == 'false':
             content = "maxpremiumlimitreached"
             await cl.send_window_message(content)
             return False
         else:
             try:
-                # requests.post("http://127.0.0.1:8086/requestcount/email/" + useremail)
-                requests.post("https://infinitydatabase.azurewebsites.net/requestcount/email/"+ useremail)
+                requests.post("http://127.0.0.1:8086/requestcount/email/" + useremail)
+                # requests.post("https://infinitydatabase.azurewebsites.net/requestcount/email/"+ useremail)
                 return  True
             except Exception as e:
                 return  False
@@ -511,8 +511,8 @@ async def validate():
             client_ip = str(uuid.uuid4())
             cl.user_session.set("client_ip", client_ip)
 
-        # response = requests.get("http://127.0.0.1:8086/requestcount/ip/" + client_ip)
-        response = requests.get("https://infinitydatabase.azurewebsites.net/requestcount/ip/" + client_ip)
+        response = requests.get("http://127.0.0.1:8086/requestcount/ip/" + client_ip)
+        # response = requests.get("https://infinitydatabase.azurewebsites.net/requestcount/ip/" + client_ip)
 
         if response.text == 'false':
             content = "maxlimitreached"
@@ -520,9 +520,9 @@ async def validate():
             return False
         else:
             try:
-                # requests.post("http://127.0.0.1:8086/requestcount/ip/" + client_ip)
-                requests.post("https://infinitydatabase.azurewebsites.net/requestcount/ip/" + client_ip)
-                # return True
+                requests.post("http://127.0.0.1:8086/requestcount/ip/" + client_ip)
+                # requests.post("https://infinitydatabase.azurewebsites.net/requestcount/ip/" + client_ip)
+                return True
             except Exception as e:
                 return False
                 print(e)
@@ -581,7 +581,8 @@ async def window_message(message: str):
             name = "default"
         cl.user_session.set("useremail",email)
 
-        requests.post("https://infinitydatabase.azurewebsites.net/users/" + email)
+        requests.post("https://localhost:8086/users/" + email)
+        # requests.post("https://infinitydatabase.azurewebsites.net/users/" + email)
 
 from realtime import RealtimeClient
 from realtime.tools import tools
