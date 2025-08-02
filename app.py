@@ -103,8 +103,7 @@ async def getWebsitesProps(websites,titles,favicons, contents,thumbnails):
                     sourceCount += 1
             i += 1
     except Exception as e:
-        logger = cl.user_session.get("logger")
-        logger.error("Error while preparing websites props \n %s",e)
+        print("Error while preparing websites props \n %s",e)
     finally: 
         websitesProps["sourceCount"] = sourceCount
         
@@ -153,8 +152,7 @@ async def getImagesProps(images):
                 imageCount += 1
             i += 1
     except Exception as e:
-        logger = cl.user_session.get("logger")
-        logger.info("Error while populating image props from Google\n%s",e)
+        print("Error while populating image props from Google\n%s",e)
     finally:
         imagesProps["imagesCount"] = imageCount
   
@@ -176,8 +174,7 @@ async def get_images_fromgoogle(prompt):
             if(image.link != None and image.contextLink != None and image.displayLink != None):
                 images.append(image)
     except:
-        logger = cl.user_session.get("logger")
-        logger.info("Error while getting images from google:\n %s",len(images))
+        print("Error while getting images from google:\n %s",len(images))
     finally:
         props =  await getImagesProps(images)
  
@@ -230,8 +227,7 @@ async def get_websites_fromgoogle(prompt):
         favicons = get_fav_icons(websites)
         
     except Exception as e:
-        logger = cl.user_session.get("logger")
-        logger.info("Error while fetching websites from google \n%s",e)
+        print("Error while fetching websites from google \n%s",e)
     finally:
         props =  await getWebsitesProps(websites,titles, favicons, contents,thumbnails)       
         props["prompt"] = prompt
@@ -251,8 +247,7 @@ async def get_questionsProps(questions):
             props["question4"] =questions["Q4"]
  
     except Exception as e:
-        logger = cl.user_session.get("logger")
-        logger.info("Exception while preparing questions props:\n%s",e)
+        print("Exception while preparing questions props:\n%s",e)
     finally:
         return props 
  
@@ -286,7 +281,7 @@ async def on_chat_start():
             cl.user_session.set("project_client", project_client) 
             
     except Exception as e: 
-        logger.error("Error while creating project_client: \n%s",e)
+        print("Error while creating project_client: \n%s",e)
         return
 
     try:
@@ -296,7 +291,7 @@ async def on_chat_start():
             cl.user_session.set("agents_client", agents_client) 
             
     except Exception as e: 
-        logger.error("Error while creating agents_client: \n%s",e)
+        print("Error while creating agents_client: \n%s",e)
         return 
  
     try:
@@ -305,8 +300,8 @@ async def on_chat_start():
             agent = agents_client.get_agent("asst_58piOsPpG4mOb2CdVWZC9uPF")
             cl.user_session.set("agent", agent) 
             
-    except Exception as e: 
-        logger.error("Error while creating agent: \n%s",e) 
+    except Exception as e:
+        print("Error while creating agent: \n%s",e)
         return  
     
     try:
@@ -320,8 +315,8 @@ async def on_chat_start():
             thread2 = agents_client.threads.create()
             cl.user_session.set("thread2", thread2)
             
-    except Exception as e: 
-        logger.error("Error while creating agent: \n%s",e) 
+    except Exception as e:
+        print("Error while creating agent: \n%s",e)
         return  
 
     try:
@@ -331,8 +326,8 @@ async def on_chat_start():
         #     logger = logging.getLogger(__name__)
         #     cl.user_session.set("logger", logger)
             
-    except Exception as e: 
-        logger.error("Error while logger: \n%s",e) 
+    except Exception as e:
+        print("Error while logger: \n%s",e)
         return
 
     content =  "started"
@@ -366,7 +361,8 @@ async def returnError():
 
 async def sendResponseMessage(message: cl.Message):
     try:
-        logger = cl.user_session.get("logger") 
+        global logger
+        # logger = cl.user_session.get("logger")
         sources_element_props = await get_websites_fromgoogle(message.content)   
         images_element_props = await get_images_fromgoogle(message.content)
 
@@ -383,7 +379,8 @@ async def sendResponseMessage(message: cl.Message):
         return result
     except Exception as e:
         await returnError()
-        logger.error("Error while streaming message\n%s",e)
+
+        print("Error while streaming message\n%s",e)
         return False
     
 async def StreamAgentResponse(prompt, forUris= False ):
@@ -491,16 +488,16 @@ MaxRequestCount = 2
 async def validate():
     useremail = cl.user_session.get("useremail")
     if useremail != None and useremail != '' and useremail != "default":
-        # response = requests.get("http://127.0.0.1:8086/requestcount/email/" + useremail)
-        response = requests.get("https://infinitydatabase.azurewebsites.net/requestcount/email/" + useremail)
+        response = requests.get("http://127.0.0.1:8086/requestcount/email/" + useremail)
+        # response = requests.get("https://infinitydatabase.azurewebsites.net/requestcount/email/" + useremail)
         if response.text == 'false':
             content = "maxpremiumlimitreached"
             await cl.send_window_message(content)
             return False
         else:
             try:
-                # requests.post("http://127.0.0.1:8086/requestcount/email/" + useremail)
-                requests.post("https://infinitydatabase.azurewebsites.net/requestcount/email/"+ useremail)
+                requests.post("http://127.0.0.1:8086/requestcount/email/" + useremail)
+                # requests.post("https://infinitydatabase.azurewebsites.net/requestcount/email/"+ useremail)
                 return  True
             except Exception as e:
                 return  False
@@ -511,8 +508,8 @@ async def validate():
             client_ip = str(uuid.uuid4())
             cl.user_session.set("client_ip", client_ip)
 
-        # response = requests.get("http://127.0.0.1:8086/requestcount/ip/" + client_ip)
-        response = requests.get("https://infinitydatabase.azurewebsites.net/requestcount/ip/" + client_ip)
+        response = requests.get("http://127.0.0.1:8086/requestcount/ip/" + client_ip)
+        # response = requests.get("https://infinitydatabase.azurewebsites.net/requestcount/ip/" + client_ip)
 
         if response.text == 'false':
             content = "maxlimitreached"
@@ -520,13 +517,14 @@ async def validate():
             return False
         else:
             try:
-                # requests.post("http://127.0.0.1:8086/requestcount/ip/" + client_ip)
-                requests.post("https://infinitydatabase.azurewebsites.net/requestcount/ip/" + client_ip)
+                requests.post("http://127.0.0.1:8086/requestcount/ip/" + client_ip)
+                # requests.post("https://infinitydatabase.azurewebsites.net/requestcount/ip/" + client_ip)
                 return True
             except Exception as e:
                 return False
                 print(e)
 
+from database import *
 from fastapi import Request
 @cl.on_message
 async def on_message(message: cl.Message):
@@ -536,40 +534,42 @@ async def on_message(message: cl.Message):
     isValid = await validate()
     if not isValid:
         return
-    # correlationId = str(uuid.uuid4())
-    # try:
-    #     cl.user_session.set("correlationId", correlationId)
-    #     create_prompt(message.content,0,uuid.uuid4())
-    #
-    #     prompt = {
-    #         "prompt": message.content,
-    #         "correlationId": correlationId
-    #     }
-    #
-    #     publish_message_to_topic(json.dumps(prompt))
-    #     propsVar = {"correlationId": correlationId}
-    #     ResearchTopHeader = cl.CustomElement(name="ResearchTopHeader", props=propsVar, display="inline")
-    #     researchTopHeaderMsg = cl.Message(content="", elements=[ResearchTopHeader],author="Infinity")
-    #     await researchTopHeaderMsg.send()
-    #
-    # except Exception as ex:
-    #     print(ex)
-    #
+    correlationId = str(uuid.uuid4())
+    try:
+        cl.user_session.set("correlationId", correlationId)
+        create_prompt(message.content,0,uuid.uuid4())
+
+        prompt = {
+            "prompt": message.content,
+            "correlationId": correlationId
+        }
+
+        requests.post("http://localhost:8088",json=prompt)
+
+        # publish_message_to_topic(json.dumps(prompt))
+        propsVar = {"correlationId": correlationId}
+        ResearchTopHeader = cl.CustomElement(name="Research", props=propsVar, display="inline")
+        researchTopHeaderMsg = cl.Message(content="", elements=[ResearchTopHeader],author="Infinity")
+        await researchTopHeaderMsg.send()
+
+    except Exception as ex:
+        print(ex)
+
     # logger = cl.user_session.get("logger")
    #
    # #
    #  if checkForSessionVariables() == False:
    #      await returnError()
    #      return
-    try:
-        print(cl.user_session.get("username"))
-        result = await sendResponseMessage(message)
-
-        if result:
-            await sendFollowupQuestions(message)
-
-    except Exception as e:
-        print("Error in OnMessage:\n%s",e)
+   #  try:
+   #      print(cl.user_session.get("username"))
+   #      result = await sendResponseMessage(message)
+   #
+   #      if result:
+   #          await sendFollowupQuestions(message)
+   #
+   #  except Exception as e:
+   #      print("Error in OnMessage:\n%s",e)
 
 @cl.on_window_message
 async def window_message(message: str):
@@ -581,8 +581,8 @@ async def window_message(message: str):
             name = "default"
         cl.user_session.set("useremail",email)
 
-        # requests.post("https://localhost:8086/users/" + email)
-        requests.post("https://infinitydatabase.azurewebsites.net/users/" + email)
+        requests.post("http://localhost:8086/users/" + email)
+        # requests.post("https://infinitydatabase.azurewebsites.net/users/" + email)
 
 from realtime import RealtimeClient
 from realtime.tools import tools
@@ -627,7 +627,7 @@ async def setup_openai_realtime():
         await cl.context.emitter.send_audio_interrupt()
 
     async def handle_error(event):
-        logger.error(event)
+        print(event)
 
     openai_realtime.on("conversation.updated", handle_conversation_updated)
     openai_realtime.on("conversation.item.completed", handle_item_completed)
@@ -673,11 +673,12 @@ async def on_audio_start():
 
 @cl.on_audio_chunk
 async def on_audio_chunk(chunk: cl.InputAudioChunk):
+
     openai_realtime: RealtimeClient = cl.user_session.get("openai_realtime")
     if openai_realtime.is_connected():
         await openai_realtime.append_input_audio(chunk.data)
     else:
-        logger.info("RealtimeClient is not connected")
+        print("RealtimeClient is not connected")
 
 @cl.on_audio_end
 @cl.on_chat_end

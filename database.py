@@ -1,12 +1,12 @@
 import uuid
-
+from googleClient import  getKeyValue
 import pyodbc
 import sqlite3
 # Azure SQL Database details
 server = 'infinitydbserver.database.windows.net'
 database = 'infinity'
 username = 'CloudSAc2e67f07'
-password = ''
+password = getKeyValue("sqlloginpwd")
 
 # Connection string
 connection_string = (
@@ -17,7 +17,6 @@ connection_string = (
     f"PWD={password};"
 )
 connection = None
-
 
 def establishDbConnection():
     global connection
@@ -74,3 +73,19 @@ def update_summary(status,correlationId):
     cursor.execute('UPDATE ClientSummary SET status = ? WHERE correlationid = ?', (status,correlationId))
     connection.commit()
     print("Summary updated successfully!")
+
+def get_matching_question_action(correlationId):
+    global connection
+    cursor = connection.cursor()
+    # cursor.execute('SELECT Prompt,Stage,Sources FROM Stage AS S, StageMetadata AS SM  WHERE S.correlationId = ? and  S.Status = 0 and count(*) = SELECT COUNT(*) FROM SM WHERE SM.CorrelationId=?', (correlationId,correlationId))
+    cursor.execute("EXEC GetStageDetails ?",correlationId)
+    rows = cursor.fetchall()
+    return rows
+
+# Function to update a record
+def update_stage(status,prompt, correlationId):
+    global connection
+    cursor = connection.cursor()
+    cursor.execute('UPDATE Stage SET status = ? WHERE correlationid = ? and prompt=?', (status, correlationId,prompt))
+    connection.commit()
+    print("Stage updated successfully!")

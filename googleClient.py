@@ -21,6 +21,7 @@ secrets = {}
 secrets["google-search-uri"] = None
 secrets["google-fav-icons-uri"] = None
 secrets["agent-uri"] = None
+secrets["sqlloginpwd"] = None
 
 def getKeyValue(secret_name):
 
