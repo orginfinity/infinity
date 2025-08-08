@@ -17,6 +17,8 @@ from chainlit.input_widget import Select, Switch, Slider
 import json
 import requests
 
+import database
+from googleClient import *
 secrets = {}
 secrets["google-search-uri"] = None
 secrets["google-fav-icons-uri"] = None
@@ -26,26 +28,26 @@ secrets["google-client-id"] = None
 secrets["chainlit-secret"] = None
 secrets["azure-openai-key"] = None
 
-def getKeyValue(secret_name):
-
-    if secret_name not in secrets.keys():
-        return None
-    
-    if secrets[secret_name] != None:
-        return secrets[secret_name]
-    
-    key_vault_url = "https://infinity.vault.azure.net/" 
-    credential = DefaultAzureCredential() 
-    client = SecretClient(vault_url=key_vault_url, credential=credential)
-    
-    try:
-        # Retrieve the secret
-        retrieved_secret = client.get_secret(secret_name)
-        secrets[secret_name] = retrieved_secret.value
-        return retrieved_secret.value
-    except Exception as e:
-        print(e)
-        return None 
+# def getKeyValue(secret_name):
+#
+#     if secret_name not in secrets.keys():
+#         return None
+#
+#     if secrets[secret_name] != None:
+#         return secrets[secret_name]
+#
+#     key_vault_url = "https://infinity.vault.azure.net/"
+#     credential = DefaultAzureCredential()
+#     client = SecretClient(vault_url=key_vault_url, credential=credential)
+#
+#     try:
+#         # Retrieve the secret
+#         retrieved_secret = client.get_secret(secret_name)
+#         secrets[secret_name] = retrieved_secret.value
+#         return retrieved_secret.value
+#     except Exception as e:
+#         print(e)
+#         return None
     
 google_search_uri = getKeyValue("google-search-uri")
 google_fav_icons_uri = getKeyValue("google-fav-icons-uri") 
@@ -255,10 +257,8 @@ async def get_questionsProps(questions):
 # async def on_action(action):
 #     payload = action.payload
 #     val = payload["value"]
-#     sources_element = cl.CustomElement(name="LinearTicket",props=val) 
+#     sources_element = cl.CustomElement(name="LinearTicket",props=val)
 #     await cl.Message(content="",elements=[sources_element]).update()
-
-
 
 from collections import defaultdict
 messages = defaultdict(int)
@@ -268,6 +268,25 @@ agent = None
 
 @cl.on_chat_start
 async def on_chat_start():
+
+    content = {"command":"useremail","status":"processing"}
+    await cl.send_window_message(content)
+
+    content = {"command":"getreqlimits","status":"processing"}
+    await cl.send_window_message(content)
+
+    cl.user_session.set("mode","search")
+    settings = await cl.ChatSettings(
+        [
+            Select(
+                id="Mode",
+                label="Mode",
+                values=["Audio", "Books", "Research", "Regular"],
+                initial_index=3,
+            ),
+            ]).send()
+    monitor_element = cl.CustomElement(name="Monitor")
+    await cl.Message(content="",elements=[monitor_element]).send()
 
     await setup_openai_realtime()
 
@@ -332,7 +351,8 @@ async def on_chat_start():
 
     content =  "started"
     await cl.send_window_message(content)
-# from database import establishDbConnection
+
+ # from database import establishDbConnection
 # establishDbConnection()
 
 def checkForSessionVariables():
@@ -347,7 +367,7 @@ def checkForSessionVariables():
     except Exception as e:
         return False
 
-    if project_client == None or agents_client == None or agent == None or  thread == None or logger == None or thread2 == None:
+    if project_client == None or agents_client == None or agent == None or  thread == None  or thread2 == None:
             return False
     
     return True
@@ -359,22 +379,22 @@ async def returnError():
             # elements=[image],
         ).send()
 
-async def sendResponseMessage(message: cl.Message):
+async def sendResponseMessage(prompt):
     try:
         global logger
         # logger = cl.user_session.get("logger")
-        sources_element_props = await get_websites_fromgoogle(message.content)   
-        images_element_props = await get_images_fromgoogle(message.content)
+        sources_element_props = await get_websites_fromgoogle(prompt)
+        images_element_props = await get_images_fromgoogle(prompt)
 
         if sources_element_props["sourceCount"] != 0 or images_element_props["imagesCount"] != 0:
             headerProps = sources_element_props | images_element_props
-            headerProps["prompt"] = message.content
+            headerProps["prompt"] = prompt
 
             Header  = cl.CustomElement(name="Header",props=headerProps, display="inline")   
             headerMsg = cl.Message(content="",elements=[Header],  author="Infinity")
             await headerMsg.send()
 
-        response, result = await StreamAgentResponse(message.content)
+        response, result = await StreamAgentResponse(prompt)
   
         return result
     except Exception as e:
@@ -420,25 +440,20 @@ async def StreamAgentResponse(prompt, forUris= False ):
     except Exception as e:
         return False 
     
-def sendFollowupQuestions(prompt):
+async def sendFollowupQuestions(prompt):
+    prompt = "give me response in the following JSON format {\"Q1\":\"..\",\"Q2\":\"..\",\"Q3\":\"..\",\"Q4\":\"..\"}. " \
+             "Q1,Q2,Q3 and Q4 are for the follow up questions to the prompt. Your prompt is this -" + prompt
+    questions = await StreamAgentResponse(prompt, True)
+
     try:
-        prompt = "give me response in the following JSON format {\"Q1\":\"..\",\"Q2\":\"..\",\"Q3\":\"..\",\"Q4\":\"..\"}. " \
-                 "Q1,Q2,Q3 and Q4 are for the additional prompts you may want to suggest the user based on the prompt. Do not respond with questions but statements." \
-                 " Do not ask any clarifying questions. Do not ask any personal questions about the user." \
-                 "     Your prompt is this - " + prompt
-
-        from openai import OpenAI
-        client = OpenAI()
-        client.api_key = getKeyValue("azure-openai-key")
-        response = client.responses.create(
-            model="gpt-4.1",
-            input=prompt
-        )
-        return response.output_text
-        # print(response.output_text)
-
+        questions = json.loads(questions[0])
+        questions_element_props = await get_questions(questions)
+        questions_element = cl.CustomElement(name="FollowUpQuestions", props=questions_element_props)
+        msg = cl.Message(content="", elements=[questions_element], author="Infinity")
+        await msg.send()
     except Exception as e:
-        print("Error while building follow up questions!\n%s", e)
+        print(e)
+
 
 os.environ["OAUTH_GOOGLE_CLIENT_ID"] = getKeyValue("google-client-id")
 os.environ["OAUTH_GOOGLE_CLIENT_SECRET"] = getKeyValue("google-auth-secret")
@@ -448,12 +463,15 @@ os.environ["CHAINLIT_ROOT_PATH"] = "/"
 print(str(os.environ["OAUTH_GOOGLE_CLIENT_ID"]))
 print(str(os.environ["OAUTH_GOOGLE_CLIENT_SECRET"]))
 
+database.establishDbConnection()
+
 @cl.action_callback("action_button")
 async def on_action(action):
     try:
         correlationId = cl.user_session.get("correlationId")
-        clientSummaries = get_matching_question_action(correlationId)
 
+        clientSummaries = get_matching_question_action(correlationId)
+        # clientSummaries = requests.get("http://localhost:8086//summaries/"+correlationId)
         count = 0
         propsVar = {}
         for summary in clientSummaries:
@@ -465,10 +483,13 @@ async def on_action(action):
 
             propsVar[promptVar] = summary[0]
             propsVar[actionVar] = summary[1]
-            propsVar[sourcesVar] = summary[3]
-            propsVar[faviconVar] = summary[4]
+            sources = summary[3].replace("'", "\"")
+            propsVar[sourcesVar] = json.loads(sources)
 
-            update_stage(1, summary[0], correlationId)
+            favicons = summary[4].replace("'", "\"")
+            propsVar[faviconVar] = json.loads(favicons)
+
+
             count += 1
 
         if count > 0:
@@ -479,110 +500,90 @@ async def on_action(action):
 
             ResearchStepsMsg = cl.Message(content="", author="Infinity")
             await ResearchStepsMsg.send()
+            update_stagemetadata(1, correlationId)
 
     except Exception as ex:
         print(ex)
 
-MaxRequestCount = 2
+async def get_questions(questions):
+    """Pretending to fetch data from linear"""
+    return {
+        "question1":questions["Q1"],
+        "question2":questions["Q2"],
+        "question3":questions["Q3"],
+        "question4":questions["Q4"]
+    }
 
-async def validate():
-    useremail = cl.user_session.get("useremail")
-    if useremail != None and useremail != '' and useremail != "default":
-        response = requests.get("http://127.0.0.1:8086/requestcount/email/" + useremail)
-        # response = requests.get("https://infinitydatabase.azurewebsites.net/requestcount/email/" + useremail)
-        if response.text == 'false':
-            content = "maxpremiumlimitreached"
-            await cl.send_window_message(content)
-            return False
-        else:
-            try:
-                requests.post("http://127.0.0.1:8086/requestcount/email/" + useremail)
-                # requests.post("https://infinitydatabase.azurewebsites.net/requestcount/email/"+ useremail)
-                return  True
-            except Exception as e:
-                return  False
-                print(e)
-    else:
-        client_ip = cl.user_session.get("client_ip")
-        if client_ip == None:
-            client_ip = str(uuid.uuid4())
-            cl.user_session.set("client_ip", client_ip)
+def updateIPBasedMsgCount():
+    requests.post("http://localhost:8086/requestcount/ip")
 
-        response = requests.get("http://127.0.0.1:8086/requestcount/ip/" + client_ip)
-        # response = requests.get("https://infinitydatabase.azurewebsites.net/requestcount/ip/" + client_ip)
-
-        if response.text == 'false':
-            content = "maxlimitreached"
-            await cl.send_window_message(content)
-            return False
-        else:
-            try:
-                requests.post("http://127.0.0.1:8086/requestcount/ip/" + client_ip)
-                # requests.post("https://infinitydatabase.azurewebsites.net/requestcount/ip/" + client_ip)
-                return True
-            except Exception as e:
-                return False
-                print(e)
+def updateEmailBasedMsgCount():
+    email = cl.user_session.get("email")
+    requests.post("http://localhost:8086/requestcount/email/" + email)
 
 from database import *
 from fastapi import Request
 @cl.on_message
 async def on_message(message: cl.Message):
-    content = "closeuserpanel"
-    await cl.send_window_message(content)
 
-    isValid = await validate()
-    if not isValid:
+    currentReqCount = cl.user_session.get("curReqCount")
+    maxReqCount = cl.user_session.get("maxReqCount")
+
+    if(currentReqCount == None or maxReqCount == None):
+        content = {"command": "getreqlimits", "status": "processing"}
+        await cl.send_window_message(content)
+        await cl.Message(content="There was an error. Please try again later.").send()
+
+    if(currentReqCount > maxReqCount):
+        content = {"command":"limitreached","status":"processing"}
+        await cl.send_window_message(content)
         return
-    correlationId = str(uuid.uuid4())
-    try:
-        cl.user_session.set("correlationId", correlationId)
-        create_prompt(message.content,0,uuid.uuid4())
 
-        prompt = {
-            "prompt": message.content,
-            "correlationId": correlationId
-        }
+    prompt = message.content
+    mode = cl.user_session.get("mode")
 
-        requests.post("http://localhost:8088",json=prompt)
+    if mode == "search":
+        # if checkForSessionVariables() == False:
+        #     await returnError()
+        #     return
+        try:
+            result = await sendResponseMessage(prompt)
+            if result:
+                await sendFollowupQuestions(prompt)
 
-        # publish_message_to_topic(json.dumps(prompt))
-        propsVar = {"correlationId": correlationId}
-        ResearchTopHeader = cl.CustomElement(name="Research", props=propsVar, display="inline")
-        researchTopHeaderMsg = cl.Message(content="", elements=[ResearchTopHeader],author="Infinity")
-        await researchTopHeaderMsg.send()
+        except Exception as e:
+            print("Error in OnMessage:\n%s",e)
+    else:
+        correlationId = str(uuid.uuid4())
+        try:
+            cl.user_session.set("correlationId", correlationId)
+            create_prompt(message.content,0,uuid.uuid4())
 
-    except Exception as ex:
-        print(ex)
+            prompt = {
+                "prompt": message.content,
+                "correlationId": correlationId
+            }
 
-    # logger = cl.user_session.get("logger")
-   #
-   # #
-   #  if checkForSessionVariables() == False:
-   #      await returnError()
-   #      return
-   #  try:
-   #      print(cl.user_session.get("username"))
-   #      result = await sendResponseMessage(message)
-   #
-   #      if result:
-   #          await sendFollowupQuestions(message)
-   #
-   #  except Exception as e:
-   #      print("Error in OnMessage:\n%s",e)
+            requests.post("http://localhost:8088/prompt",json=prompt)
+            propsVar = {"correlationId": correlationId}
+            ResearchTopHeader = cl.CustomElement(name="Research", props=propsVar, display="inline")
+            researchTopHeaderMsg = cl.Message(content="", elements=[ResearchTopHeader],author="Infinity")
+            await researchTopHeaderMsg.send()
+
+        except Exception as ex:
+            print(ex)
+
+    email = cl.user_session.get("email")
+    if email == None:
+        updateIPBasedMsgCount()
+    else:
+        updateEmailBasedMsgCount()
+    cl.user_session.set("curReqCount", currentReqCount + 1)
 
 @cl.on_window_message
 async def window_message(message: str):
-
     first_key = next(iter(message))
-    if(first_key == "email"):
-        email = message[first_key]
-        if len(email) == 0:
-            name = "default"
-        cl.user_session.set("useremail",email)
-
-        requests.post("http://localhost:8086/users/" + email)
-        # requests.post("https://infinitydatabase.azurewebsites.net/users/" + email)
+    cl.user_session.set(first_key, message[first_key])
 
 from realtime import RealtimeClient
 from realtime.tools import tools
@@ -644,6 +645,9 @@ async def setup_openai_realtime():
 @cl.on_audio_start
 async def on_audio_start():
     try:
+        msg = {"command": "useremail"}
+        await cl.send_window_message(msg)
+
         isValid = await validate()
         if not isValid:
             return
@@ -687,3 +691,15 @@ async def on_end():
     openai_realtime: RealtimeClient = cl.user_session.get("openai_realtime")
     if openai_realtime and openai_realtime.is_connected():
         await openai_realtime.disconnect()
+
+from fastapi import FastAPI, Request
+from starlette.middleware.cors import CORSMiddleware
+app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://proud-hill-0b342cf00.1.azurestaticapps.net", "http://localhost:3000",
+                   "https://localhost:8082/auth/login","http://localhost:8088"],  # Allow all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+)

@@ -83,9 +83,9 @@ def get_matching_question_action(correlationId):
     return rows
 
 # Function to update a record
-def update_stage(status,prompt, correlationId):
+def update_stagemetadata(status, correlationId):
     global connection
     cursor = connection.cursor()
-    cursor.execute('UPDATE Stage SET status = ? WHERE correlationid = ? and prompt=?', (status, correlationId,prompt))
+    cursor.execute('UPDATE StageMetadata SET status = ? WHERE correlationid = ?', (1, correlationId))
     connection.commit()
     print("Stage updated successfully!")

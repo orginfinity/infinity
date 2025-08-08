@@ -22,6 +22,11 @@ secrets["google-search-uri"] = None
 secrets["google-fav-icons-uri"] = None
 secrets["agent-uri"] = None
 secrets["sqlloginpwd"] = None
+secrets["google-auth-secret"] = None
+secrets["google-client-id"] = None
+secrets["chainlit-secret"] = None
+secrets["azure-openai-key"] = None
+
 
 def getKeyValue(secret_name):
 
