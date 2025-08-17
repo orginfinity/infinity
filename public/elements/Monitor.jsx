@@ -60,48 +60,26 @@ function Monitor()
       }, []);
 
     window.addEventListener("message", (event) => {
+
     if(event.origin === "http://localhost:3000" && event.data.status === "processing")
     {
-       //  if(event.data.command === "sendIPTrackedMessage")
-       //  {
-       //      alert('here')
-       //      let chatinput = document.getElementById('chat-input')
-       //
-       //      event.data.status = "done"
-       //      sendUserMessage(chatinput.innerText)
-       //      let msg = {command:"updateIPBasedMsgCount",correlationId:"",result:"",status:"processing"}
-       //      window.parent.postMessage(msg, '*')
-       //  }
-       //
-       // if(event.data.command === "sendEmailTrackedMessage")
-       //  {
-       //      let chatinput = document.getElementById('chat-input')
-       //      event.data.status = "done"
-       //      sendUserMessage(chatinput.innerText)
-       //      let msg = {command:"updateEmailBasedMsgCount",correlationId:"",result:"",status:"processing"}
-       //      window.parent.postMessage(msg, '*')
-       //  }
-
-       // if(event.origin === "http://localhost:3000" && event.data.command === "setMode") {
-       //      event.data.status = "done"
-       //      let modeVal = event.data.mode
-       //     document.getElementById('mode').innerText  = modeVal
-       //      // setMode(modeVal)
-       // }
-
-        if(event.origin === "http://localhost:3000" && event.data.status === "processing") {
+         if(event.origin === "http://localhost:3000" && event.data.status === "processing") {
             if(event.data.command === "setSearchMode")
             {
                 event.data.status = "done"
-                alert(event.data.command)
-            }
+                let submit = document.getElementById('chat-input')
+                submit.setAttribute("data-placeholder","mode set to search...")
+                // alert(submit.getAttribute("data-placeholder"))
+           }
        }
 
         if(event.origin === "http://localhost:3000" && event.data.status === "processing") {
+
             if(event.data.command === "setProjectMode")
             {
                 event.data.status = "done"
-                alert(event.data.command)
+                let submit = document.getElementById('chat-input')
+                submit.setAttribute("data-placeholder","mode set to project...")
             }
        }
     }
@@ -147,6 +125,7 @@ function Monitor()
 
       return (
           <div className="header">
+
                 <p id="mode"></p>
             </div>
       );

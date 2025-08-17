@@ -1,4 +1,6 @@
-import React ,  { useEffect, useState } from 'react';
+import React ,  { useEffect, useState, memo } from 'react';
+// import spinner from './spinner.gif'
+
 
 function getResearchResults()
 {
@@ -13,64 +15,62 @@ function getResearchResults()
     });
 }
 
-function runTask() {
-    let timer =  null
-
-    let url = "http://localhost:8086/stages/"+ props.correlationId
-    fetch(url)
-    .then((response) => response.json())
-    .then((json) => {
-
-        if(json.status === 1)
-        {
-            alert('calling')
-            callAction({name: "action_button", payload: {correlationId:props.correlationId}})
-            clearTimeout(timer)
-        }
-        else
-        {
-            timer = setTimeout(runTask,5000)
-        }
-    })
-    .catch((error) => {
-        alert(error)
-    });
-
-}
+let count = 0;
 
 function click()
 {
     alert('called')
     callAction({name: "action_button", payload: {correlationId:props.correlationId}})
 }
+let id = null
+
+
 const Research = () =>
 {
-    function sourcesClicked()
-    {
-        setShowSources(true)
-        setShowAnswer(false)
-    }
+const [statusMsg, setStatusMsg] = useState("")
+// const [es, setES] = useState(null)
+const eventSource = new EventSource("http://localhost:8088/stream/"+ props.correlationId);
 
-    function answerClicked()
-    {
-        setShowSources(false)
-        setShowAnswer(true)
-    }
+     async function fetchJokes() {
 
-    const [showSources, setShowSources] = useState(true)
-    const [showAnswer, setShowAnswer] = useState(true)
+        eventSource.onmessage = (event) => {
+            let data = JSON.parse(event.data.toString())
+            console.log(data.statusmsg)
+            setStatusMsg(data.statusmsg);
+
+            if(data.statusmsg === "Done" || data.statusmsg === "Error" || data.statusmsg === "Timeout")
+            {
+                // let submit = document.getElementById('chat-submit')
+                // submit.disabled = false
+                eventSource.close()
+            }
+        };
+
+        eventSource.onerror = () => {
+             // let submit = document.getElementById('chat-submit')
+            // submit.disabled = false
+            alert("EventSource failed.");
+            return () => eventSource.close();
+        };
+        return () => { eventSource.close();}
+
+    }
    useEffect(() => {
-       runTask()
-      }, []);
+       if(props.correlationId !== "start")
+       {
+           fetchJokes()
+       }
+      }, [statusMsg]);
 
     return  (
-          <div className='projectcommands'>
+          <div id='projectcommands' className='projectcommands'>
+                {/*<p  id='dummy'>{props.correlationId}</p>*/}
+              <div className={`spinner ${statusMsg !=='Done' && statusMsg !=='Error' &&  statusMsg !=='Timeout'  ? 'show' : ''}`}>
+                  <img    src="http://localhost:8086/spinner" width="40" height="40" />
+                    {/*<p className={`statusmsg ${statusMsg !=='Done'   ? 'show' : ''}`}>{statusMsg}</p>*/}
+              </div>
+              <p>{statusMsg}</p>
 
-                <button onClick={sourcesClicked}>Sources</button>
-                <button onClick={answerClicked}>Answer</button>
-
-            {/*<div id='sources' className={`sources ${showSources ? 'show' : ''}`} ></div>*/}
-            {/*<div id='answer' className={`snswer ${showAnswer ? 'show' : ''}`}></div>*/}
         </div>
         )
 }

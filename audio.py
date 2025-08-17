@@ -3,6 +3,7 @@ import asyncio
 from openai import AsyncOpenAI
 
 import chainlit as cl
+import uuid
 from uuid import uuid4
 from chainlit.logger import logger
 
@@ -12,10 +13,12 @@ from realtime.tools import tools
 client = AsyncOpenAI()
 
 from googleClient import getKeyValue
+from openai import AsyncOpenAI
+
 async def setup_openai_realtime():
     """Instantiate and configure the OpenAI Realtime Client"""
     openai_realtime = RealtimeClient(api_key=getKeyValue("azure-openai-key"))
-    cl.user_session.set("track_id", str(uuid4()))
+    cl.user_session.set("track_id", str(uuid.uuid4()))
 
     async def handle_conversation_updated(event):
         item = event.get("item")
@@ -46,11 +49,11 @@ async def setup_openai_realtime():
 
     async def handle_conversation_interrupt(event):
         """Used to cancel the client previous audio playback."""
-        cl.user_session.set("track_id", str(uuid4()))
+        cl.user_session.set("track_id", str(uuid.uuid4()))
         await cl.context.emitter.send_audio_interrupt()
 
     async def handle_error(event):
-        logger.error(event)
+        print(event)
 
     openai_realtime.on("conversation.updated", handle_conversation_updated)
     openai_realtime.on("conversation.item.completed", handle_item_completed)
@@ -64,35 +67,30 @@ async def setup_openai_realtime():
     ]
     await asyncio.gather(*coros)
 
-
-@cl.on_chat_start
-async def start():
-    await cl.Message(
-        content="Welcome to the Chainlit x OpenAI realtime example. Press `P` to talk!"
-    ).send()
-    await setup_openai_realtime()
-
-
-# @cl.on_message
-# async def on_message(message: cl.Message):
-    # openai_realtime: RealtimeClient = cl.user_session.get("openai_realtime")
-    # if openai_realtime and openai_realtime.is_connected():
-    #     # TODO: Try image processing with message.elements
-    #     await openai_realtime.send_user_message_content(
-    #         [{"type": "input_text", "text": message.content}]
-    #     )
-    # else:
-    #     await cl.Message(
-    #         content="Please activate voice mode before sending messages!"
-    #     ).send()
-
-
 @cl.on_audio_start
 async def on_audio_start():
     try:
+        msg = {"command": "useremail"}
+        await cl.send_window_message(msg)
+
+        isValid = await validate()
+        if not isValid:
+            return
+
         openai_realtime: RealtimeClient = cl.user_session.get("openai_realtime")
+        if openai_realtime == None:
+            await cl.Message(content="Still setting up audio connectors. Please try again").send()
+            return
+
+        useremail = cl.user_session.get("useremail")
+        if useremail == None or  useremail == "" or useremail == "default":
+            content = "userpanel:Please login to exprience audio chat."
+            await cl.send_window_message(content)
+            return
+
+
         await openai_realtime.connect()
-        logger.info("Connected to OpenAI realtime")
+        # logger.info("Connected to OpenAI realtime")
         # TODO: might want to recreate items to restore context
         # openai_realtime.create_conversation_item(item)
         return True
@@ -102,15 +100,14 @@ async def on_audio_start():
         ).send()
         return False
 
-
 @cl.on_audio_chunk
 async def on_audio_chunk(chunk: cl.InputAudioChunk):
+
     openai_realtime: RealtimeClient = cl.user_session.get("openai_realtime")
     if openai_realtime.is_connected():
         await openai_realtime.append_input_audio(chunk.data)
     else:
-        logger.info("RealtimeClient is not connected")
-
+        print("RealtimeClient is not connected")
 
 @cl.on_audio_end
 @cl.on_chat_end
@@ -119,3 +116,6 @@ async def on_end():
     openai_realtime: RealtimeClient = cl.user_session.get("openai_realtime")
     if openai_realtime and openai_realtime.is_connected():
         await openai_realtime.disconnect()
+
+from fastapi import FastAPI, Request
+from starlette.middleware.cors import CORSMiddleware

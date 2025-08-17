@@ -166,7 +166,7 @@ const Header = () =>
             <table  > 
                 <tr>
                     <td>
-                        <button className="headerbutton  bg-accent" onClick={answerClicked}  id="answer" style={{display:"inline"}}  >ANSWER</button>
+                        <button  className="headerbutton  bg-accent" onClick={answerClicked}  id="answer" style={{display:"inline"}}  >ANSWER</button>
                     </td>
                     <td>
                          <button className="headerbutton  bg-accent"  onClick={sourcesClicked}  id="sources"  >SOURCES</button>

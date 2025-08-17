@@ -12,6 +12,10 @@
   },
   "private": true,
   "dependencies": {
-    "react-dom": "^19.1.1"
+    "jspdf": "^3.0.1",
+    "react-dom": "^19.1.1",
+    "react-markdown": "^10.1.0",
+    "reactjs-popup": "^2.0.6",
+    "turndown": "^7.2.1"
   }
 }
