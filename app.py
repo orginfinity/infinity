@@ -1,4 +1,4 @@
-from database import *
+# from database import *
 from googleClient import *
 from collections import defaultdict
 from audio import *
@@ -131,7 +131,7 @@ def checkForSessionVariables():
 # os.environ["CHAINLIT_AUTH_SECRET"] = getKeyValue("chainlit-secret")
 # os.environ["CHAINLIT_ROOT_PATH"] = "/"
 
-database.establishDbConnection()
+# database.establishDbConnection()
  
 
 async def updateIPBasedMsgCount():
@@ -212,18 +212,18 @@ async def on_message(message: cl.Message):
 
     email = cl.user_session.get("email")
 
-    try:
-        if email == None:
-            await updateIPBasedMsgCount()
-        else:
-            await updateEmailBasedMsgCount()
+    # try:
+    #     if email == None:
+    #         await updateIPBasedMsgCount()
+    #     else:
+    #         await updateEmailBasedMsgCount()
 
-        if requestsnotfound:
-            content = {"command": "getreqlimits", "status": "processing"}
-            await cl.send_window_message(content)
+    #     if requestsnotfound:
+    #         content = {"command": "getreqlimits", "status": "processing"}
+    #         await cl.send_window_message(content)
 
-    except Exception as ex:
-        print(str(ex))
+    # except Exception as ex:
+    #     print(str(ex))
 
     cl.user_session.set("curReqCount", currentReqCount + 1)
     await asyncio.gather(updateProgress(progressmsg, "Done", False, True))
