@@ -1,4 +1,4 @@
-import database
+from database import *
 from googleClient import *
 from collections import defaultdict
 from audio import *
