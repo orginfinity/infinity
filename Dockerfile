@@ -71,22 +71,22 @@ RUN apt-get update && \
     gnupg2 &&\
     rm -rf /var/lib/apt/lists/* && \
     pip install --upgrade pip \
-    bash 
+    # bash 
     
 RUN apt-get update
  
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+# RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
  
-RUN curl https://packages.microsoft.com/config/debian/11/prod.list > /etc/apt/sources.list.d/mssql-release.list
+# RUN curl https://packages.microsoft.com/config/debian/11/prod.list > /etc/apt/sources.list.d/mssql-release.list
  
-RUN exit
+# RUN exit
  
-RUN apt-get update 
+# RUN apt-get update 
 
-RUN env ACCEPT_EULA=Y apt-get install -y msodbcsql18
-COPY /odbc.ini /
-RUN odbcinst -i -s -f /odbc.ini -l
-RUN cat /etc/odbc.ini
+# RUN env ACCEPT_EULA=Y apt-get install -y msodbcsql18
+# COPY /odbc.ini /
+# RUN odbcinst -i -s -f /odbc.ini -l
+# RUN cat /etc/odbc.ini
 RUN pip install --no-cache-dir -r requirements.txt
  
 COPY chainlit.md .
