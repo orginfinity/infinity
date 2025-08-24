@@ -16,13 +16,13 @@ timeout = 30
 debug = "true"
 
 from collections import defaultdict
-from database import *
+# from database import *
 messages = defaultdict(int)
 project_client = None
 agents_client = None
 agent = None
-from database import establishDbConnection, create_summary
-establishDbConnection()
+# from database import establishDbConnection, create_summary
+# establishDbConnection()
 
 from googleClient import get_websites_fromgoogle
 import json
