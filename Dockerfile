@@ -71,7 +71,7 @@ RUN apt-get update && \
     gnupg2 &&\
     rm -rf /var/lib/apt/lists/* && \
     pip install --upgrade pip
- 
+RUN apk add --no-cache --update bash app1 app2
 RUN apt-get update
  
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
