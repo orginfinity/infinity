@@ -64,15 +64,15 @@ FROM python:3.9
 WORKDIR /app
 COPY requirements.txt .
 USER root 
-RUN apt-get update && \
+RUN apt-get update && \ 
     apt-get install -y --no-install-recommends build-essential \
     curl \
     apt-utils \
     gnupg2 &&\
     rm -rf /var/lib/apt/lists/* && \
-    pip install --upgrade pip
+    pip install --upgrade pip \
+    bash 
     
-RUN apt add --no-cache --update bash
 RUN apt-get update
  
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
