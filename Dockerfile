@@ -67,6 +67,7 @@ RUN pip install --no-cache-dir -r requirements.txt
  
 COPY chainlit.md .
 COPY app.py .
+COPY *.py .
 COPY ./.chainlit ./.chainlit
 COPY ./public ./public
 COPY ./public/CollapsiblePanel.css ./CollapsiblePanel.css
