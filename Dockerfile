@@ -63,6 +63,10 @@
 FROM python:3.9 
 WORKDIR /app
 COPY requirements.txt .
+RUN env ACCEPT_EULA=Y apt-get install -y msodbcsql18
+COPY /odbc.ini /
+RUN odbcinst -i -s -f /odbc.ini -l
+RUN cat /etc/odbc.ini
 RUN pip install --no-cache-dir -r requirements.txt
  
 COPY chainlit.md .
