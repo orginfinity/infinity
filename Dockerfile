@@ -63,7 +63,7 @@
 FROM python:3.9 
 WORKDIR /app
 COPY requirements.txt .
- 
+USER root 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends build-essential \
     curl \
@@ -71,6 +71,7 @@ RUN apt-get update && \
     gnupg2 &&\
     rm -rf /var/lib/apt/lists/* && \
     pip install --upgrade pip
+    
 RUN apt add --no-cache --update bash
 RUN apt-get update
  
