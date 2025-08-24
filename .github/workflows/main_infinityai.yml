@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu:20.04
 
     steps:
     - uses: actions/checkout@v2
@@ -30,3 +30,4 @@ jobs:
     #     app-name: 'infinityai'
     #     publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
     #     images: 'infinity.azurecr.io/infinity:${{ github.sha }}'
+
