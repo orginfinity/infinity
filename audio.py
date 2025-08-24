@@ -10,7 +10,7 @@ from chainlit.logger import logger
 from realtime import RealtimeClient
 from realtime.tools import tools
 
-client = AsyncOpenAI()
+# client = AsyncOpenAI()
 
 from googleClient import getKeyValue
 from openai import AsyncOpenAI
