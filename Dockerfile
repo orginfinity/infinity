@@ -31,6 +31,7 @@ ENV PYTHONUNBUFFERED 1
 # The RUN instruction will execute any commands in a new layer on top of the current image and commit the results. 
 # The resulting committed image will be used for the next step in the Dockerfile.
 # For more information, see: https://docs.docker.com/engine/reference/builder/#run
+RUN apt update && apt install -y software-properties-common
 RUN apt-get update && apt-get install -y \
   build-essential \
   curl \
