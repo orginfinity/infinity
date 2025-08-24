@@ -22,7 +22,7 @@ const Research = () =>
 
     return  (
           <div id='simplesearchprogress' className='simplesearchprogress'  >
-
+    
               <img className={`spinner ${showSpinner ? 'show' : ''}`} src="http://localhost:8086/spinner" width="40" height="40" />
                 <p className={`spinner ${showSpinner ? 'show' : ''}`} >{props.message}</p>
         </div>

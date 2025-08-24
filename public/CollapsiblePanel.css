@@ -553,3 +553,44 @@ font-weight: bold;
   /*position: absolute;*/
   /*display: flex;*/
 }
+
+.articles1
+{
+    display: flex;
+    flex-direction: column;
+    gap:10px;
+    position: relative;
+    font-size: small;
+}
+.articles2
+{
+    display: flex;
+    flex-direction: row;
+    gap:10px;
+    position: relative;
+    font-size: small;
+}
+
+.publishdate
+{
+    font-size: smaller;
+    color:red
+}
+
+p
+{
+    max-width: 70vh;
+    word-wrap: break-word;
+    text-align: justify;
+}
+
+.newsimage
+{
+    width: 20vh;
+    height: auto;
+}
+
+.newslink {
+  color: red; /* Default link color */
+   font-size:smaller; /* Makes text bold */
+}

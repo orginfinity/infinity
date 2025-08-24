@@ -2,7 +2,7 @@ import asyncio
 from asyncio import as_completed
 from concurrent.futures import ThreadPoolExecutor
 
-from common import StatusMsg
+from common import *
 
 temperature = 0.9
 api_type = "azure"
@@ -113,7 +113,7 @@ async def performProject(prompt):
                 result.answer = answer
                 results.append(result)
 
-                statusMsg = StatusMsg("statusmsg",f"stage {i} complete.")
+                statusMsg = StatusMsg("statusmsg",f"stage {i+1} complete.")
                 yield statusMsg
 
         except Exception as e:
@@ -133,22 +133,71 @@ async def performProject(prompt):
         print(str(e))
         statusMsg = StatusMsg("statusmsg", "error")
         yield statusMsg
+ 
+ 
+async def onProjectAnswer(clientSummaries,mainprompt):
+    try:
+        count = 0
+        propsVar = {}
+        completeAnswer = ""
+        for summary in clientSummaries:
 
+            promptVar = "prompt" + str(count)
+            actionVar = "action" + str(count)
+            sourcesVar = "sources" + str(count)
+            faviconVar = "favicon" + str(count)
+            answerVar = "answer" + str(count)
 
-async def test():
-    queue = asyncio.Queue()
-    async for result in performProject( "cheese",queue):
-        print(result.result)
+            propsVar[promptVar] = summary.prompt
+            propsVar[actionVar] = summary.stage
 
-from fastapi import FastAPI
-app = FastAPI()
+            sources = summary.sources
+            formattedSources = [x.replace("'","\"") for x in sources]
+            propsVar[sourcesVar] = formattedSources
 
-@app.get("/")
-async def get_stream():
-    async for result in performProject( "cheese"):
-        print(result.result)
+            favicons = summary.favicons
+            formattedFavIcons = [x.replace("'", "\"") for x in favicons]
+            propsVar[faviconVar] = formattedFavIcons
 
-# asyncio.run(test())
-# asyncio.run(test())
-# asyncio.run(test())
-# asyncio.run(test())
+            propsVar[answerVar] = summary.answer
+            completeAnswer += summary.answer
+            count += 1
+
+        if count > 0:
+            propsVar["promptactioncount"] = count
+            propsVar["mainprompt"] = mainprompt
+            propsVar["answer"] = completeAnswer
+
+            ProjectElem = cl.CustomElement(name="Project", props=propsVar, display="inline")
+            docxelem = await getDocxFile(mainprompt, completeAnswer)
+            pdfElem = await getPDFFile(mainprompt, completeAnswer)
+            mdElem = await getMDFile(mainprompt, completeAnswer)
+
+            ProjectMsg = cl.Message(content="", elements=[docxelem,pdfElem,mdElem], author="Infinity")
+            await ProjectMsg.send()
+
+            ProjectMsg = cl.Message(content="", elements=[ProjectElem], author="Infinity")
+            await ProjectMsg.send()
+
+            ProjectMsg = cl.Message(content=completeAnswer,   author="Infinity")
+            await ProjectMsg.send()
+
+    except Exception as ex:
+        #TODO: Signal to caller to cancel timer
+        print(ex)
+  
+async def conductProject(prompt,progressmsg):
+    async for result in performProject(prompt):            
+        try:
+            if result.command == "statusmsg":
+                if( result.result == "error"):
+                    await asyncio.gather(updateProgress(progressmsg, result.result, False, True))
+                else:
+                    await asyncio.gather(updateProgress(progressmsg, result.result, True, True))
+            elif result.command == "projectresult":
+                await onProjectAnswer(result.result, prompt)
+                await asyncio.gather(updateProgress(progressmsg, "Done", False, True))
+
+        except Exception as ex:
+            print(str(ex))
+            await cl.Message(content = "There was an error. Please try again").send()

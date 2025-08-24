@@ -68,7 +68,7 @@ edit_message = true
 # Name of the assistant.
 name = "Infinity"
 
- default_theme = "light"
+ default_theme = "dark"
 
 # layout = "wide"
 
