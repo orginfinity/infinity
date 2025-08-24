@@ -142,7 +142,7 @@ async def updateEmailBasedMsgCount():
     requests.post("http://localhost:8086/requestcount/email/" + email)
 
 
-from database import *
+# from database import *
 from Project import *
 from search import *
 from news import *
