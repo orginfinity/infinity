@@ -48,10 +48,10 @@ import markdown
 async def getDocxFile(mainprompt, md_content):
     md_content += "## **" + mainprompt + "**"
     html_content_bytes = markdown.markdown(md_content)
-
+    filename = mainprompt[0:5] + ".."
     buf = html2docx(html_content_bytes, title="My Document")
     fileelem = cl.File(
-        name= mainprompt + ".docx",
+        name= filename + ".docx",
         content=buf.getvalue(),
         # content=doc_stream.getvalue(),
         display="inline"
@@ -66,8 +66,9 @@ async def getPDFFile(mainprompt, md_content):
 
     pdf_bytes = BytesIO()
     pisa_status = pisa.CreatePDF(html_content, dest=pdf_bytes)
+    filename = mainprompt[0:5] + ".."
     fileelem = cl.File(
-        name= mainprompt + ".pdf",
+        name= filename + ".pdf",
         content=pdf_bytes.getvalue(),
         # content=doc_stream.getvalue(),
         display="inline"
@@ -77,8 +78,9 @@ async def getPDFFile(mainprompt, md_content):
 
 async def getMDFile(mainprompt, md_content):
     md_content += "## **" + mainprompt + "**"
+    filename = mainprompt[0:5] + ".."
     fileelem = cl.File(
-        name= mainprompt + ".md",
+        name= filename + ".md",
         content=md_content,
         # content=doc_stream.getvalue(),
         display="inline"

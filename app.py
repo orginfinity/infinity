@@ -82,6 +82,24 @@ commands = [
 
 @cl.on_chat_start
 async def on_chat_start():
+
+    try:
+        filepath = "/tmp/tmp.txt"
+        with open(filepath, 'w') as file:
+            file.write('This file is saved in a new folder.\n')
+            print("File written!")
+
+            try:
+                with open('tmp.txt', 'r') as file:
+                    content = file.read()
+                    print("file content " + content)
+                    
+            except FileNotFoundError:
+                print("Error: File not found.")
+
+    except Exception as e:
+        print("exception while writing file " + str(e))
+
     global project_client,agents_client,agent,thread,thread2
 
     project_client = AIProjectClient(endpoint=agent_uri, credential=DefaultAzureCredential())
