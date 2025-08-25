@@ -96,5 +96,6 @@ COPY ./.chainlit ./.chainlit
 COPY ./public ./public
 COPY ./public/CollapsiblePanel.css ./CollapsiblePanel.css
 COPY ./realtime ./realtime
+COPY Image.jsx .
 EXPOSE 8080 
 CMD [ "chainlit", "run", "app.py", "-h","--host", "0.0.0.0", "--port", "8080"]  
