@@ -30,6 +30,7 @@ from azure.ai.agents.models import (
     MessageDeltaTextUrlCitationAnnotation,
     MessageDeltaTextContent, 
 )
+import os
 
 def setupChat():
     global project_client
@@ -89,6 +90,15 @@ async def on_chat_start():
             file.write('This file is saved in a new folder.\n')
             print("File written!")
 
+            import os
+
+            directory = "/tmp"
+            print("printing files")
+            for item in os.listdir(directory):
+                print(item)
+
+            print("printed files")
+            
             try:
                 with open("/tmp/tmp.txt", "r") as file:
                     lines = file.readlines()  # Returns a list of lines
