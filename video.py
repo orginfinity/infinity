@@ -65,10 +65,12 @@ async def performVideo(prompt):
                     directory = "/tmp"
                     print("printing files")
                     for item in os.listdir(directory):
-                        print(item)
-                                        
-                    video = cl.Video(path=output_filename)
-                    await cl.Message(content="",elements=[video]).send()   
+                        with open("/tmp/"+item, "r") as file:
+                            lines = file.read()  
+                            print(lines)
+                                            
+                        video = cl.Video(content=lines)
+                        await cl.Message(content="",elements=[video]).send()   
                     
         else:
             raise Exception("No generations found in job result.")
