@@ -235,10 +235,7 @@ async def on_message(message: cl.Message):
         return
     
     elif command == "Video":
-        bytes = await performVideo(message.content)
-        # mp4bytes = await convertBytesToMP4(bytes)
-        video = cl.Video(contnet=bytes)
-        await cl.Message(content="",elements=[video]).send()
+        await performVideo(message.content)             
         await asyncio.gather(updateProgress(progressmsg, "", False, False))
  
         return
