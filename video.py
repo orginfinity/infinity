@@ -67,7 +67,7 @@ async def performVideo(prompt):
                     for item in os.listdir(directory):
                         print(item)
                                         
-                    video = cl.Video(path="/tmp/" + output_filename)
+                    video = cl.Video(path=output_filename)
                     await cl.Message(content="",elements=[video]).send()   
                     
         else:
