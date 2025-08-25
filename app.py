@@ -209,7 +209,7 @@ async def on_message(message: cl.Message):
     showSpinner = True
     progreselem = cl.CustomElement(name="SimpleSearchProgress", display="inline")
     progressmsg = cl.Message(content="", elements=[progreselem], author="Infinity")
-    await asyncio.gather(updateProgress(progressmsg, "Thinking...", showSpinner, False))
+    await  updateProgress(progressmsg, "Thinking...", showSpinner, False)
  
     if command == "Search":
         await conductSearch(prompt,progressmsg,agents_client,agent,thread,thread2)
