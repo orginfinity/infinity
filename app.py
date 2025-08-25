@@ -84,36 +84,36 @@ commands = [
 @cl.on_chat_start
 async def on_chat_start():
 
-    try:
-        filepath = "/tmp/tmp.txt"
-        with open(filepath, 'w') as file:
-            file.write('This file is saved in a new folder.\n')
-            print("File written!")
+    # try:
+    #     filepath = "/tmp/tmp.txt"
+    #     with open(filepath, 'w') as file:
+    #         file.write('This file is saved in a new folder.\n')
+    #         print("File written!")
 
-            import os
+    #         import os
 
-            directory = "/tmp"
-            print("printing files")
-            for item in os.listdir(directory):
-                print(item)
+    #         directory = "/tmp"
+    #         print("printing files")
+    #         for item in os.listdir(directory):
+    #             print(item)
 
-            print("printed files")
-            
-            try:
-                with open("/tmp/tmp.txt", "r") as file:
-                    lines = file.readlines()  # Returns a list of lines
-                    for line in lines:
-                        print(line.strip())  # Print each line
+    #         print("printed files")
+
+    #         try:
+    #             with open("/tmp/tmp.txt", "r") as file:
+    #                 lines = file.readlines()  # Returns a list of lines
+    #                 for line in lines:
+    #                     print(line.strip())  # Print each line
                     
-                with open('/tmp/tmp.txt', 'r', encoding="utf-8") as file:
-                    content = file.read()
-                    print("file content " + content)
+    #             with open('/tmp/tmp.txt', 'r', encoding="utf-8") as file:
+    #                 content = file.read()
+    #                 print("file content " + content)
 
-            except FileNotFoundError:
-                print("Error: File not found.")
+    #         except FileNotFoundError:
+    #             print("Error: File not found.")
 
-    except Exception as e:
-        print("exception while writing file " + str(e))
+    # except Exception as e:
+    #     print("exception while writing file " + str(e))
 
     global project_client,agents_client,agent,thread,thread2
 

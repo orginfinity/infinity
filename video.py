@@ -50,9 +50,7 @@ async def performVideo(prompt):
             generation_id = generations[0].get("id")
             video_url = f"{endpoint}/openai/v1/video/generations/{generation_id}/content/video?api-version={api_version}"
           
-            video = cl.Video(url=video_url)
-            await cl.Message(content="",elements=[video]).send()   
-            return
+         
         
             headers= { "Authorization": f"Bearer {token.token}", "Content-Type": "video/mp4" }
 
@@ -63,8 +61,15 @@ async def performVideo(prompt):
                 with open(output_filename, "wb") as file:
                     file.write(video_response.content)
                     print(f'Generated video saved as "{output_filename}"')
-                
-                return video_response.content
+
+                    directory = "/tmp"
+                    print("printing files")
+                    for item in os.listdir(directory):
+                        print(item)
+                                        
+                    video = cl.Video(path="/tmp/" + output_filename)
+                    await cl.Message(content="",elements=[video]).send()   
+                    
         else:
             raise Exception("No generations found in job result.")
     else:
