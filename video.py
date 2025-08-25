@@ -60,7 +60,7 @@ async def performVideo(progressmsg,prompt):
             video_response = requests.get(video_url, headers=headers)
             if video_response.ok:            
                 await  updateProgress(progressmsg, "Video response Ok...", True, True)
-                output_filename = os.path.join("tmp", "output.mp4")
+                output_filename = os.path.join("/tmp", "output.mp4")
                 with open(output_filename, "wb") as file:
                     file.write(video_response.content)
                     print(f'Generated video saved as "{output_filename}"')
@@ -72,7 +72,8 @@ async def performVideo(progressmsg,prompt):
                     #         lines = file.read()  
                     #         print(lines)
                 await  updateProgress(progressmsg, "Playing video...", True, True)
-                video = cl.Video(path="tmp\\output.mp4")
+                # video = cl.Video(path="tmp\\output.mp4")
+                video = cl.Video(path=output_filename)
                 await cl.Message(content="",elements=[video]).send()   
                 await  updateProgress(progressmsg, "", False, True)
         else:
