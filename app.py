@@ -83,7 +83,7 @@ commands = [
 
 @cl.on_chat_start
 async def on_chat_start():
-
+   
     # try:
     #     filepath = "/tmp/tmp.txt"
     #     with open(filepath, 'w') as file:
@@ -209,7 +209,7 @@ async def on_message(message: cl.Message):
     showSpinner = True
     progreselem = cl.CustomElement(name="SimpleSearchProgress", display="inline")
     progressmsg = cl.Message(content="", elements=[progreselem], author="Infinity")
-    await  updateProgress(progressmsg, "Thinking...", showSpinner, False)
+    await  updateProgress(progressmsg, "Learning...", showSpinner, False)
  
     if command == "Search":
         await conductSearch(prompt,progressmsg,agents_client,agent,thread,thread2)
@@ -230,13 +230,13 @@ async def on_message(message: cl.Message):
         return
 
     elif command == "Image":
-        await performImage(message.content)
-        await asyncio.gather(updateProgress(progressmsg, "", False, False))
+        await performImage(progressmsg, message.content)
+        # await asyncio.gather(updateProgress(progressmsg, "", False, False))
         return
     
     elif command == "Video":
-        await performVideo(message.content)             
-        await asyncio.gather(updateProgress(progressmsg, "", False, False))
+        await performVideo(progressmsg, message.content)             
+        # await updateProgress(progressmsg, "", False, False)
  
         return
 

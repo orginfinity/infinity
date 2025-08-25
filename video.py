@@ -5,9 +5,10 @@ from azure.identity import DefaultAzureCredential
 import time
 from io import BytesIO 
 import chainlit as cl
+from common import *
 
-async def performVideo(prompt):
-
+async def performVideo(progressmsg,prompt):
+ 
     # Set environment variables or edit the corresponding values here.
     endpoint = "https://umesh-meoam0uu-swedencentral.openai.azure.com"
 
@@ -36,28 +37,30 @@ async def performVideo(prompt):
     # 2. Poll for job status
     status_url = f"{endpoint}/openai/v1/video/generations/jobs/{job_id}?api-version={api_version}"
     status=None
-    while status not in ("succeeded", "failed", "cancelled"):
+    while status not in ("succeeded", "failed", "cancelled"):       
         time.sleep(5)  # Wait before polling again
         status_response = requests.get(status_url, headers=headers).json()
         status = status_response.get("status")
         print(f"Job status: {status}")
+        await  updateProgress(progressmsg, f"Job status: {status}", True, True)
 
     # 3. Retrieve generated video 
     if status == "succeeded":
+        await  updateProgress(progressmsg, "Succeeded...", True, True)
         generations = status_response.get("generations", [])
         if generations:
             print(f"✅ Video generation succeeded.")
             generation_id = generations[0].get("id")
             video_url = f"{endpoint}/openai/v1/video/generations/{generation_id}/content/video?api-version={api_version}"
           
-         
+            await  updateProgress(progressmsg, "Downloading video...", True, True)
         
             headers= { "Authorization": f"Bearer {token.token}", "Content-Type": "video/mp4" }
 
             video_response = requests.get(video_url, headers=headers)
             if video_response.ok:            
-                  
-                output_filename = "/tmp/output.mp4"
+                await  updateProgress(progressmsg, "Video response Ok...", True, True)
+                output_filename = os.path.join("tmp", "output.mp4")
                 with open(output_filename, "wb") as file:
                     file.write(video_response.content)
                     print(f'Generated video saved as "{output_filename}"')
@@ -68,10 +71,10 @@ async def performVideo(prompt):
                     #     with open("/tmp/"+item, "r") as file:
                     #         lines = file.read()  
                     #         print(lines)
-                                            
-                    video = cl.Video(path=output_filename)
-                    await cl.Message(content="",elements=[video]).send()   
-                    
+                await  updateProgress(progressmsg, "Playing video...", True, True)
+                video = cl.Video(path="tmp\\output.mp4")
+                await cl.Message(content="",elements=[video]).send()   
+                await  updateProgress(progressmsg, "", False, True)
         else:
             raise Exception("No generations found in job result.")
     else:
