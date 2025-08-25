@@ -594,3 +594,9 @@ p
   color: red; /* Default link color */
    font-size:smaller; /* Makes text bold */
 }
+
+.image
+{
+  width:50vh;
+  height:auto
+}
