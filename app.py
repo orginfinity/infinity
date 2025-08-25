@@ -90,7 +90,7 @@ async def on_chat_start():
             print("File written!")
 
             try:
-                with open("file.txt", "r") as file:
+                with open("/tmp/tmp.txt", "r") as file:
                     lines = file.readlines()  # Returns a list of lines
                     for line in lines:
                         print(line.strip())  # Print each line
