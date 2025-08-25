@@ -27,7 +27,7 @@ async def performVideo(prompt):
         "n_seconds": 5,
         "model": "sora"
     }
-    response = requests.post(create_url, json=body)
+    response = requests.post(create_url, headers=headers, json=body)
     response.raise_for_status()
     print("Full response JSON:", response.json())
     job_id = response.json()["id"]
@@ -66,7 +66,7 @@ async def performVideo(prompt):
                     print("printing files")
                     for item in os.listdir(directory):
                         print(item)
-
+                                        
                     video = cl.Video(path="/tmp/" + output_filename)
                     await cl.Message(content="",elements=[video]).send()   
                     
