@@ -14,6 +14,6 @@ async def performImage(prompt):
 
     url = response.data[0].url
     propsVar = {"imageurl": url}
-    imageelem = cl.CustomElement(name="Image",props=propsVar, display="inline")
+    imageelem = cl.CustomElement(name="image",props=propsVar, display="inline")
 
     await cl.Message(content=prompt,elements=[imageelem]).send()
