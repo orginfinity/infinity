@@ -90,10 +90,10 @@ async def on_chat_start():
             print("File written!")
 
             try:
-                with open('tmp.txt', 'r') as file:
+                with open('/tmp/tmp.txt', 'r') as file:
                     content = file.read()
                     print("file content " + content)
-                    
+
             except FileNotFoundError:
                 print("Error: File not found.")
 
