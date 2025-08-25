@@ -57,7 +57,7 @@ async def performVideo(prompt):
             video_response = requests.get(video_url, headers=headers)
             if video_response.ok:            
                   
-                output_filename = "output.mp4"
+                output_filename = "/tmp/output.mp4"
                 with open(output_filename, "wb") as file:
                     file.write(video_response.content)
                     print(f'Generated video saved as "{output_filename}"')
