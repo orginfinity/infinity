@@ -598,5 +598,7 @@ p
 .image
 {
   width:50vh;
-  height:auto
+  height:auto;
+  display: flex;
+  justify-content: center;
 }
